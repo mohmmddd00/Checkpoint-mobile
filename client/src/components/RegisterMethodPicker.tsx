@@ -1,5 +1,4 @@
-// import { useNavigate } from "react-router-dom";
-// import { routes } from "../../../server/src/routes/routes";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { GoogleAuthButton } from "./GoogleAuthButton";
 
 interface RegisterMethodPickerProps {
@@ -9,66 +8,72 @@ interface RegisterMethodPickerProps {
 
 export function RegisterMethodPicker({ onEmailSelect, onSwitchToLogin }: RegisterMethodPickerProps) {
   return (
-    <>
-      <button
-        type="button"
-        onClick={onEmailSelect}
-        style={{
-          width: "100%",
-          padding: "13px",
-          borderRadius: "12px",
-          border: "1px solid rgba(255,255,255,0.18)",
-          background: "rgba(255,255,255,0.08)",
-          color: "#F7F4F5",
-          fontWeight: 600,
-          cursor: "pointer",
-          fontSize: "14px",
-          letterSpacing: "0.3px",
-          transition: "all 0.2s ease",
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = "rgba(255,255,255,0.14)";
-          e.currentTarget.style.borderColor = "rgba(255,255,255,0.3)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = "rgba(255,255,255,0.08)";
-          e.currentTarget.style.borderColor = "rgba(255,255,255,0.18)";
-        }}
+    <View>
+      <TouchableOpacity
+        onPress={onEmailSelect}
+        style={styles.emailButton}
+        activeOpacity={0.7}
       >
-        Register with email
-      </button>
+        <Text style={styles.emailButtonText}>Register with email</Text>
+      </TouchableOpacity>
 
-      <div style={{ display: "flex", alignItems: "center", gap: "12px", margin: "20px 0 16px" }}>
-        <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.1)" }} />
-        <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "12px" }}>or</span>
-        <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.1)" }} />
-      </div>
+      <View style={styles.divider}>
+        <View style={styles.dividerLine} />
+        <Text style={styles.dividerText}>or</Text>
+        <View style={styles.dividerLine} />
+      </View>
 
       <GoogleAuthButton mode="register" />
 
-      <button
-        type="button"
-        className="animated-underline-btn"
-        onClick={onSwitchToLogin}
-        style={{
-          marginTop: "16px",
-          background: "none",
-          border: "none",
-          color: "rgba(255,255,255,0.6)",
-          cursor: "pointer",
-          width: "max-content",
-          padding: "4px 0px",
-          marginLeft: "auto",
-          marginRight: "auto",
-          display: "block",
-          fontSize: "14px",
-          transition: "color 0.15s ease",
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.color = "#E6A1B0")}
-        onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.6)")}
+      <TouchableOpacity
+        onPress={onSwitchToLogin}
+        style={styles.switchBtn}
+        activeOpacity={0.7}
       >
-        Already have an account?
-      </button>
-    </>
+        <Text style={styles.switchBtnText}>Already have an account?</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  emailButton: {
+    width: "100%",
+    padding: 13,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.18)",
+    backgroundColor: "rgba(255,255,255,0.08)",
+    alignItems: "center",
+  },
+  emailButtonText: {
+    color: "#F7F4F5",
+    fontWeight: "600",
+    fontSize: 14,
+    letterSpacing: 0.3,
+  },
+  divider: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginVertical: 20,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "rgba(255,255,255,0.1)",
+  },
+  dividerText: {
+    color: "rgba(255,255,255,0.3)",
+    fontSize: 12,
+  },
+  switchBtn: {
+    alignSelf: "center",
+    marginTop: 16,
+    padding: 4,
+  },
+  switchBtnText: {
+    color: "rgba(255,255,255,0.6)",
+    fontSize: 14,
+  },
+});

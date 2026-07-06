@@ -1,17 +1,16 @@
-import { useState } from "react";
-import type { InputHTMLAttributes } from "react";
+import { useState } from 'react';
+import { TextInput, StyleSheet } from 'react-native';
+import type { TextInputProps, ViewStyle } from 'react-native';
 
-interface AuthInputProps extends InputHTMLAttributes<HTMLInputElement> {
-  // All standard input props (type, placeholder, value, onChange, required, id, etc.)
-  // are passed straight through — no logic lives here, only styling.
-  containerStyle?: React.CSSProperties;
+interface AuthInputProps extends TextInputProps {
+  containerStyle?: ViewStyle;
 }
 
 export function AuthInput({ containerStyle, style, ...rest }: AuthInputProps) {
   const [focused, setFocused] = useState(false);
 
   return (
-    <input
+    <TextInput
       {...rest}
       onFocus={(e) => {
         setFocused(true);
@@ -21,26 +20,33 @@ export function AuthInput({ containerStyle, style, ...rest }: AuthInputProps) {
         setFocused(false);
         rest.onBlur?.(e);
       }}
-      style={{
-        width: "100%",
-        boxSizing: "border-box",
-        padding: "13px 16px",
-        borderRadius: "12px",
-        border: focused
-          ? "1px solid rgba(158,27,50,0.7)"
-          : "1px solid rgba(255,255,255,0.13)",
-        background: focused
-          ? "rgba(158,27,50,0.08)"
-          : "rgba(255,255,255,0.08)",
-        color: "white",
-        fontSize: "15px",
-        outline: "none",
-        transition: "border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease",
-        boxShadow: focused
-            ? "inset 0 1px 0 rgba(255,255,255,0.07)"
-            : "inset 0 1px 0 rgba(255,255,255,0.05)",
-        ...style,
-      }}
+      placeholderTextColor="rgba(255,255,255,0.4)"
+      style={[
+        styles.input,
+        focused ? styles.inputFocused : styles.inputBlurred,
+        style,
+      ]}
     />
   );
 }
+
+const styles = StyleSheet.create({
+  input: {
+    width: '100%',
+    paddingVertical: 13,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    color: 'white',
+    fontSize: 15,
+  },
+  inputBlurred: {
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.13)',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+  },
+  inputFocused: {
+    borderWidth: 1,
+    borderColor: 'rgba(158,27,50,0.7)',
+    backgroundColor: 'rgba(158,27,50,0.08)',
+  },
+});

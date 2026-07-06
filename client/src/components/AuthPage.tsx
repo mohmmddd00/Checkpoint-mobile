@@ -1,23 +1,42 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-// import toast from "react-hot-toast";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import axios from "axios";
-import { routes } from "../../../server/src/routes/routes";
-import { cpToast } from "../utils/toast";
+import { storage } from "../utils/storage";
 import { AuthInput } from "./AuthInput";
 import { AuthBackground } from "./AuthBackground";
 import { GoogleAuthButton } from "./GoogleAuthButton";
 import { RegisterMethodPicker } from "./RegisterMethodPicker";
+import { cpToast } from "../utils/toast";
+import { routes } from "../navigation/routes";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
+const ADMIN_EMAIL = process.env.EXPO_PUBLIC_ADMIN_EMAIL || "";
+
+export type RootStackParamList = {
+  Login: undefined;
+  Register: undefined;
+  Home: undefined;
+  VerifyAccount: { email: string };
+  ForgotPassword: undefined;
+};
 
 interface AuthPageProps {
   mode: "login" | "register";
 }
 
 export function AuthPage({ mode }: AuthPageProps) {
-  const navigate = useNavigate();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const isLogin = mode === "login";
+
   const [username, setUsername] = useState("");
   const [middleName, setMiddleName] = useState("");
   const [email, setEmail] = useState("");
@@ -28,23 +47,13 @@ export function AuthPage({ mode }: AuthPageProps) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
   const [showEmailForm, setShowEmailForm] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 480);
-
-  React.useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 480);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   React.useEffect(() => {
     setShowEmailForm(false);
   }, [mode]);
 
   // ─── ALL LOGIC BELOW IS UNCHANGED ────────────────────────────────────────
-  const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || "";
-
   const isValidEmail = (value: string): boolean => {
     if (ADMIN_EMAIL && value.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
       return true;
@@ -53,8 +62,7 @@ export function AuthPage({ mode }: AuthPageProps) {
     return emailRegex.test(value.trim());
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     setError("");
     setLoading(true);
 
@@ -64,108 +72,31 @@ export function AuthPage({ mode }: AuthPageProps) {
           username: loginUsername.trim().toLowerCase(),
           password,
         });
-
-        localStorage.setItem("token", response.data.token);
-        cpToast.success("Login successful! Welcome back!");
-        navigate(routes.home);
+        await storage.setToken(response.data.token);
+        navigation.navigate("Home");
       } else {
-        // const nameRegex = /^[A-Za-z]+$/;
-
-        if (firstName.trim().length < 2) {
-          setError("First name must be at least 2 characters.");
-          setLoading(false);
-          return;
-        }
-        if (/^-|-$/.test(firstName.trim())) {
-          setError("First name cannot start or end with a hyphen.");
-          setLoading(false);
-          return;
-        }
-        if (!/^[A-Za-z]([A-Za-z\s\-]*[A-Za-z])?$/.test(firstName.trim())) {
-          setError("First name can only contain letters, spaces, or hyphens.");
-          setLoading(false);
-          return;
-        }
-        if (middleName.trim() && middleName.trim().length < 2) {
-          setError("Middle name must be at least 2 characters.");
-          setLoading(false);
-          return;
-        }
-        if (middleName.trim() && /^-|-$/.test(middleName.trim())) {
-          setError("Middle name cannot start or end with a hyphen.");
-          setLoading(false);
-          return;
-        }
-        if (middleName.trim() && !/^[A-Za-z]([A-Za-z\s\-]*[A-Za-z])?$/.test(middleName.trim())) {
-          setError("Middle name can only contain letters, spaces, or hyphens.");
-          setLoading(false);
-          return;
-        }
-        if (lastName.trim().length < 2) {
-          setError("Last name must be at least 2 characters.");
-          setLoading(false);
-          return;
-        }
-        if (/^-|-$/.test(lastName.trim())) {
-          setError("Last name cannot start or end with a hyphen.");
-          setLoading(false);
-          return;
-        }
-        if (!/^[A-Za-z]([A-Za-z\s\-]*[A-Za-z])?$/.test(lastName.trim())) {
-          setError("Last name can only contain letters, spaces, or hyphens.");
-          setLoading(false);
-          return;
-        }
-        if (!/^[A-Za-z0-9]/.test(username.trim())) {
-          setError("Username cannot start with a special character.");
-          setLoading(false);
-          return;
-        }
-        if (!/^[A-Za-z0-9_.]+$/.test(username.trim())) {
-          setError("Username can only contain letters, numbers, periods, and underscores.");
-          setLoading(false);
-          return;
-        }
-        if (username.trim().length < 3) {
-          setError("Username must be at least 3 characters.");
-          setLoading(false);
-          return;
-        }
-        if (username.trim().length > 30) {
-          setError("Username cannot exceed 30 characters.");
-          setLoading(false);
-          return;
-        }
-
-        if (password.length < 6) {
-          setError("Password must be at least 6 characters.");
-          setLoading(false);
-          return;
-        }
-
-        if (password !== confirmPassword) {
-          setError("Passwords do not match.");
-          setLoading(false);
-          return;
-        }
-
-        // Client-side email domain check (server will also enforce this)
-        if (!isValidEmail(email.trim())) {
-          setError("Please use a correct email address.");
-          setLoading(false);
-          return;
-        }
+        if (firstName.trim().length < 2) { setError("First name must be at least 2 characters."); setLoading(false); return; }
+        if (/^-|-$/.test(firstName.trim())) { setError("First name cannot start or end with a hyphen."); setLoading(false); return; }
+        if (!/^[A-Za-z]([A-Za-z\s\-]*[A-Za-z])?$/.test(firstName.trim())) { setError("First name can only contain letters, spaces, or hyphens."); setLoading(false); return; }
+        if (middleName.trim() && middleName.trim().length < 2) { setError("Middle name must be at least 2 characters."); setLoading(false); return; }
+        if (middleName.trim() && /^-|-$/.test(middleName.trim())) { setError("Middle name cannot start or end with a hyphen."); setLoading(false); return; }
+        if (middleName.trim() && !/^[A-Za-z]([A-Za-z\s\-]*[A-Za-z])?$/.test(middleName.trim())) { setError("Middle name can only contain letters, spaces, or hyphens."); setLoading(false); return; }
+        if (lastName.trim().length < 2) { setError("Last name must be at least 2 characters."); setLoading(false); return; }
+        if (/^-|-$/.test(lastName.trim())) { setError("Last name cannot start or end with a hyphen."); setLoading(false); return; }
+        if (!/^[A-Za-z]([A-Za-z\s\-]*[A-Za-z])?$/.test(lastName.trim())) { setError("Last name can only contain letters, spaces, or hyphens."); setLoading(false); return; }
+        if (!/^[A-Za-z0-9]/.test(username.trim())) { setError("Username cannot start with a special character."); setLoading(false); return; }
+        if (!/^[A-Za-z0-9_.]+$/.test(username.trim())) { setError("Username can only contain letters, numbers, periods, and underscores."); setLoading(false); return; }
+        if (username.trim().length < 3) { setError("Username must be at least 3 characters."); setLoading(false); return; }
+        if (username.trim().length > 30) { setError("Username cannot exceed 30 characters."); setLoading(false); return; }
+        if (password.length < 6) { setError("Password must be at least 6 characters."); setLoading(false); return; }
+        if (password !== confirmPassword) { setError("Passwords do not match."); setLoading(false); return; }
+        if (!isValidEmail(email.trim())) { setError("Please use a correct email address."); setLoading(false); return; }
 
         await axios.post(`${API_URL}/auth/register`, {
-          firstName,
-          lastName,
-          middleName,
-          username,
-          email,
-          password,
+          firstName, lastName, middleName, username, email, password,
         });
 
-        navigate(routes.verifyAccount, { state: { email } });
+        navigation.navigate("VerifyAccount", { email });
       }
     } catch (err: any) {
       setError(err.response?.data?.message || "Something went wrong");
@@ -175,304 +106,260 @@ export function AuthPage({ mode }: AuthPageProps) {
   };
   // ─── END UNCHANGED LOGIC ─────────────────────────────────────────────────
 
-  const buttonStyle: React.CSSProperties = {
-    width: "100%",
-    padding: "14px",
-    borderRadius: "12px",
-    border: "none",
-    background: isHovered ? "#d9bac1" : "#F7F4F5",
-    color: isHovered ? "#220209" : "#32050F",
-    fontWeight: 700,
-    cursor: "pointer",
-    fontSize: "15px",
-    letterSpacing: "0.5px",
-    transition: "all 0.2s ease-in-out",
-    boxShadow: isHovered
-      ? "0 4px 20px rgba(158,27,50,0.35)"
-      : "0 2px 12px rgba(0,0,0,0.4)",
-  };
-
   return (
-    /*
-     * Outer wrapper: position:relative + zIndex stack so AuthBackground
-     * sits behind the form content. minHeight 100vh ensures full coverage.
-     */
-    <div
-      style={{
-        minHeight: "100vh",
-        position: "relative",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: isMobile ? "12px" : "20px",
-      }}
-    >
-      {/* ── Background: gradient + SVG pattern + vignette ── */}
+    <View style={styles.container}>
       <AuthBackground />
 
-      {/* ── Foreground: logo + glass card ── */}
-      <div
-        style={{
-          position: "relative",
-          zIndex: 1,
-          width: "100%",
-          maxWidth: "420px",
-        }}
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
       >
-        {/* Logo */}
-        <h1
-          style={{
-            textAlign: "center",
-            color: "#f7f4f59b",
-            fontSize: isMobile ? "2.4rem" : "3.6rem",
-            fontWeight: 900,
-            marginBottom: isMobile ? "24px" : "44px",
-            letterSpacing: isMobile ? "2px" : "4px",
-            fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-            WebkitTextStroke: "1px #FFFFFF",
-            textShadow: "0 4px 8px rgba(0,0,0,0.5)",
-          }}
-        >
-          CHECKPOINT
-        </h1>
+        <Text style={styles.logo}>CHECKPOINT</Text>
 
-        {/* Glass card — glossier via layered box-shadows + top highlight border */}
-        <div
-          style={{
-            background: "rgba(255,255,255,0.07)",
-            backdropFilter: "blur(24px)",
-            WebkitBackdropFilter: "blur(24px)",
-            padding: isMobile ? "24px 18px" : "36px 32px",
-            borderRadius: isMobile ? "18px" : "24px",
-            /* Top-highlight gives the glossy "thick glass" feel */
-            border: "1px solid rgba(255,255,255,0.14)",
-            borderTop: "1px solid rgba(255,255,255,0.28)",
-            boxShadow:
-              "0 8px 48px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.12) inset, 0 -1px 0 rgba(0,0,0,0.3) inset",
-          }}
-        >
-          <h2
-            style={{
-              color: "#F0E6E9",
-              textAlign: "center",
-              marginBottom: "24px",
-              fontSize: "18px",
-              fontWeight: 600,
-              letterSpacing: "0.5px",
-            }}
-          >
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>
             {isLogin ? "Log in" : "Create Account"}
-          </h2>
+          </Text>
 
           {(isLogin || showEmailForm) && (
-          <form
-            onSubmit={handleSubmit}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "14px",
-            }}
-          >
-            {!isLogin && (
-              <>
-                <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: "12px" }}>
+            <View style={styles.form}>
+              {!isLogin && (
+                <>
+                  <View style={styles.nameRow}>
+                    <AuthInput
+                      placeholder="First Name"
+                      value={firstName}
+                      onChangeText={setFirstName}
+                      style={styles.halfInput}
+                    />
+                    <AuthInput
+                      placeholder="Last Name"
+                      value={lastName}
+                      onChangeText={setLastName}
+                      style={styles.halfInput}
+                    />
+                  </View>
                   <AuthInput
-                    type="text"
-                    placeholder="First Name"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    required
-                    style={{ width: isMobile ? "100%" : "50%" }}
+                    placeholder="Middle Name (Optional)"
+                    value={middleName}
+                    onChangeText={setMiddleName}
                   />
                   <AuthInput
-                    type="text"
-                    placeholder="Last Name"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    required
-                    style={{ width: isMobile ? "100%" : "50%" }}
+                    placeholder="Username"
+                    value={username}
+                    onChangeText={(t) => setUsername(t.toLowerCase())}
+                    autoCapitalize="none"
                   />
-                </div>
-                <AuthInput
-                  type="text"
-                  placeholder="Middle Name (Optional)"
-                  value={middleName}
-                  onChange={(e) => setMiddleName(e.target.value)}
-                />
+                </>
+              )}
 
+              {isLogin ? (
                 <AuthInput
-                  type="text"
                   placeholder="Username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value.toLowerCase())}
-                  required
+                  value={loginUsername}
+                  onChangeText={setLoginUsername}
+                  autoCapitalize="none"
                 />
-              </>
-            )}
+              ) : (
+                <AuthInput
+                  placeholder="Email"
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              )}
 
-            {isLogin ? (
               <AuthInput
-                type="text"
-                placeholder="Username"
-                value={loginUsername}
-                onChange={(e) => setLoginUsername(e.target.value)}
-                required
+                placeholder="Password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
               />
-            ) : (
-              <AuthInput
-                id="email"
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            )}
 
-            <AuthInput
-              id="password"
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-
-            {isLogin && (
-              <div style={{ textAlign: "right", marginTop: "-4px" }}>
-                <button
-                  type="button"
-                  onClick={() => navigate(routes.forgotPassword)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "rgba(255,255,255,0.45)",
-                    cursor: "pointer",
-                    fontSize: "13px",
-                    padding: "0",
-                    transition: "color 0.15s ease",
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "#E6A1B0")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.45)")}
+              {isLogin && (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("ForgotPassword")}
+                  style={styles.forgotBtn}
                 >
-                  Forgot your password?
-                </button>
-              </div>
-            )}
+                  <Text style={styles.forgotText}>Forgot your password?</Text>
+                </TouchableOpacity>
+              )}
 
-            {!isLogin && (
-              <AuthInput
-                type="password"
-                placeholder="Confirm Password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-            )}
+              {!isLogin && (
+                <AuthInput
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  secureTextEntry
+                />
+              )}
 
-            {error && (
-              <p
-                style={{
-                  color: "#ffb3b3",
-                  fontSize: "13px",
-                  margin: "0",
-                  padding: "8px 12px",
-                  background: "rgba(255,100,100,0.08)",
-                  borderRadius: "8px",
-                  border: "1px solid rgba(255,100,100,0.15)",
-                }}
+              {error !== "" && (
+                <View style={styles.errorBox}>
+                  <Text style={styles.errorText}>{error}</Text>
+                </View>
+              )}
+
+              <TouchableOpacity
+                onPress={handleSubmit}
+                disabled={loading}
+                style={styles.submitBtn}
               >
-                {error}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              style={buttonStyle}
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
-            >
-              {loading
-                ? "Please wait..."
-                : isLogin
-                ? "Login"
-                : "Register"}
-            </button>
-          </form>
+                {loading ? (
+                  <ActivityIndicator color="#32050F" />
+                ) : (
+                  <Text style={styles.submitBtnText}>
+                    {isLogin ? "Login" : "Register"}
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </View>
           )}
 
           {/* Register: initial picker — Google or email */}
           {!isLogin && !showEmailForm && (
             <RegisterMethodPicker
               onEmailSelect={() => setShowEmailForm(true)}
-              onSwitchToLogin={() => { navigate(routes.login); setError(""); }}
+              onSwitchToLogin={() => navigation.navigate("Login")}
             />
           )}
 
           {/* Login: divider + Google + switcher */}
           {isLogin && (
             <>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px", margin: "20px 0 16px" }}>
-                <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.1)" }} />
-                <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "12px" }}>or</span>
-                <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.1)" }} />
-              </div>
+              <View style={styles.divider}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>or</Text>
+                <View style={styles.dividerLine} />
+              </View>
               <GoogleAuthButton mode="login" />
-              <button
-                type="button"
-                className="animated-underline-btn"
-                onClick={() => { navigate(routes.registration); setError(""); }}
-                style={{
-                  marginTop: "16px",
-                  background: "none",
-                  border: "none",
-                  color: "rgba(255,255,255,0.6)",
-                  cursor: "pointer",
-                  width: "max-content",
-                  padding: "4px 0px",
-                  marginLeft: "auto",
-                  marginRight: "auto",
-                  display: "block",
-                  fontSize: "14px",
-                  transition: "color 0.15s ease",
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "#E6A1B0")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.6)")}
+              <TouchableOpacity
+                onPress={() => navigation.navigate("Register")}
+                style={[styles.switchBtn, { marginTop: 16 }]}
               >
-                Need to register?
-              </button>
+                <Text style={styles.switchBtnText}>Need to register?</Text>
+              </TouchableOpacity>
             </>
           )}
 
           {/* Register + email form: just the switcher */}
           {!isLogin && showEmailForm && (
-            <button
-              type="button"
-              className="animated-underline-btn"
-              onClick={() => { navigate(routes.login); setError(""); }}
-              style={{
-                marginTop: "16px",
-                background: "none",
-                border: "none",
-                color: "rgba(255,255,255,0.6)",
-                cursor: "pointer",
-                width: "max-content",
-                padding: "4px 0px",
-                marginLeft: "auto",
-                marginRight: "auto",
-                display: "block",
-                fontSize: "14px",
-                transition: "color 0.15s ease",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#E6A1B0")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.6)")}
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Login")}
+              style={styles.switchBtn}
             >
-              Already have an account?
-            </button>
+              <Text style={styles.switchBtnText}>Already have an account?</Text>
+            </TouchableOpacity>
           )}
-        </div>
-      </div>
-    </div>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  logo: {
+    color: "rgba(247,244,245,0.61)",
+    fontSize: 36,
+    fontWeight: "900",
+    marginBottom: 44,
+    letterSpacing: 4,
+    textShadowColor: "rgba(0,0,0,0.5)",
+    textShadowOffset: { width: 0, height: 4 },
+    textShadowRadius: 8,
+  },
+  card: {
+    width: "100%",
+    maxWidth: 420,
+    backgroundColor: "rgba(30,5,10,0.55)",
+    borderRadius: 24,
+    padding: 32,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.14)",
+  },
+  cardTitle: {
+    color: "#F0E6E9",
+    textAlign: "center",
+    marginBottom: 24,
+    fontSize: 18,
+    fontWeight: "600",
+    letterSpacing: 0.5,
+  },
+  form: {
+    gap: 14,
+  },
+  nameRow: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  halfInput: {
+    flex: 1,
+  },
+  forgotBtn: {
+    alignSelf: "flex-end",
+    marginTop: -4,
+  },
+  forgotText: {
+    color: "rgba(255,255,255,0.45)",
+    fontSize: 13,
+  },
+  errorBox: {
+    padding: 8,
+    paddingHorizontal: 12,
+    backgroundColor: "rgba(255,100,100,0.08)",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "rgba(255,100,100,0.15)",
+  },
+  errorText: {
+    color: "#ffb3b3",
+    fontSize: 13,
+  },
+  submitBtn: {
+    width: "100%",
+    padding: 14,
+    borderRadius: 12,
+    backgroundColor: "#F7F4F5",
+    alignItems: "center",
+    marginTop: 4,
+  },
+  submitBtnText: {
+    color: "#32050F",
+    fontWeight: "700",
+    fontSize: 15,
+    letterSpacing: 0.5,
+  },
+  divider: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginVertical: 20,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "rgba(255,255,255,0.1)",
+  },
+  dividerText: {
+    color: "rgba(255,255,255,0.3)",
+    fontSize: 12,
+  },
+  switchBtn: {
+    alignSelf: "center",
+    padding: 4,
+  },
+  switchBtnText: {
+    color: "rgba(255,255,255,0.6)",
+    fontSize: 14,
+  },
+});

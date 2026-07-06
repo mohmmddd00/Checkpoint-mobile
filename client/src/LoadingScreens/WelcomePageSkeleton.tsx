@@ -1,58 +1,78 @@
-import "../styles/fadeUpAnimation.css";
+import { View, StyleSheet, Animated, useWindowDimensions } from "react-native";
+import { useEffect, useRef } from "react";
 
-// ─── REUSABLE SKELETON BLOCK ─────────────────────────────────────────────────
+function Bone({ width, height, style }: { width?: any; height?: number; style?: any }) {
+  const shimmer = useRef(new Animated.Value(0)).current;
 
-function Bone({ width = "100%", height = "16px", style = {} }: {
-  width?: string;
-  height?: string;
-  style?: React.CSSProperties;
-}) {
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmer, { toValue: 1, duration: 800, useNativeDriver: true }),
+        Animated.timing(shimmer, { toValue: 0, duration: 800, useNativeDriver: true }),
+      ])
+    ).start();
+  }, []);
+
+  const opacity = shimmer.interpolate({ inputRange: [0, 1], outputRange: [0.04, 0.09] });
+
   return (
-    <div
-      className="skeleton-shimmer"
-      style={{ width, height, ...style }}
+    <Animated.View
+      style={[
+        {
+          width: width || "100%",
+          height: height || 16,
+          borderRadius: 6,
+          backgroundColor: "#fff",
+          opacity,
+        },
+        style,
+      ]}
     />
   );
 }
 
-// ─── WELCOME PAGE SKELETON ───────────────────────────────────────────────────
-
 export function WelcomePageSkeleton() {
-  // Mirror the exact grid from WelcomeContent
+  const { width } = useWindowDimensions();
+  const numColumns = width <= 480 ? 2 : 3;
   const cards = Array.from({ length: 18 });
 
-  return (
-    <main style={{ maxWidth: "1050px", margin: "40px auto 0 auto", padding: "0 20px" }}>
-      {/* Section header */}
-      <div style={{ borderBottom: "1px solid #28070F", paddingBottom: "10px", marginBottom: "20px" }}>
-        <Bone width="120px" height="14px" />
-      </div>
+  const cardWidth = (width - 40 - (numColumns - 1) * 16) / numColumns;
 
-      {/* Game card grid — matches repeat(auto-fill, minmax(160px, 1fr)) */}
-      <div style={{ display: "grid", gridTemplateColumns: window.innerWidth <= 480 ? "repeat(2, 1fr)" : "repeat(auto-fill, minmax(160px, 1fr))", gap: "25px", width: "100%" }}>
+  return (
+    <View style={styles.container}>
+      <View style={styles.headerRow}>
+        <Bone width={120} height={14} />
+      </View>
+
+      <View style={styles.grid}>
         {cards.map((_, i) => (
-          <div key={i} style={{ display: "flex", flexDirection: "column" }}>
-            {/* Poster — 2/3 aspect ratio */}
-            <Bone
-              width="100%"
-              height="0"
-              style={{
-                aspectRatio: "2/3",
-                paddingBottom: "150%",
-                borderRadius: "6px",
-              }}
-            />
-            {/* Title */}
-            <Bone
-              width="85%"
-              height="14px"
-              style={{ marginTop: "10px", marginBottom: "6px", borderRadius: "4px" }}
-            />
-            {/* Year */}
-            <Bone width="40px" height="12px" style={{ borderRadius: "4px" }} />
-          </div>
+          <View key={i} style={[styles.card, { width: cardWidth }]}>
+            <Bone width={cardWidth} height={cardWidth * 1.5} style={{ borderRadius: 6 }} />
+            <Bone width={cardWidth * 0.85} height={14} style={{ marginTop: 10, borderRadius: 4 }} />
+            <Bone width={40} height={12} style={{ marginTop: 6, borderRadius: 4 }} />
+          </View>
         ))}
-      </div>
-    </main>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+  },
+  headerRow: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#28070F",
+    paddingBottom: 10,
+    marginBottom: 20,
+  },
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 16,
+  },
+  card: {
+    flexDirection: "column",
+  },
+});
