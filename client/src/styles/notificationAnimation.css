@@ -1,0 +1,18 @@
+@keyframes swipeOutRight {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  20% {
+    opacity: 1;
+    transform: translateX(-8px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(120%);
+  }
+}
+
+.notif-swipe-out {
+  animation: swipeOutRight 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}

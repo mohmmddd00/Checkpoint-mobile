@@ -1,0 +1,93 @@
+/* CUSTOM DROPDOWN BASE TRIGGER */
+.cp-dropdown-trigger {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.cp-dropdown-trigger.open {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.35);
+  border-radius: 8px 8px 0 0;
+}
+
+.cp-dropdown-trigger.selected {
+  color: #fff;
+}
+
+.cp-dropdown-arrow {
+  font-size: 10px;
+  opacity: 0.6;
+  transition: transform 0.2s ease;
+}
+
+.cp-dropdown-arrow.open {
+  transform: rotate(180deg);
+}
+
+/* DROPDOWN LIST */
+.cp-dropdown-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, #1a0508 0%, #110305 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  z-index: 3000;
+  overflow: hidden;
+}
+
+.cp-dropdown-option {
+  padding: 10px 12px;
+  color: #D4C5C7;
+  font-size: 14px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.15s ease;
+}
+
+.cp-dropdown-option:hover {
+  background: rgba(158, 27, 50, 0.25);
+}
+
+.cp-dropdown-option.active {
+  color: #E6A1B0;
+}
+
+/* DROPDOWN WRAPPER */
+.cp-dropdown-wrapper {
+  margin-bottom: 16px;
+  position: relative;
+}
+
+/* MODAL INPUTS - REMOVE FOCUS GLOW, LIGHTEN PLACEHOLDER */
+.cp-modal-input,
+.cp-modal-textarea {
+  outline: none;
+  box-shadow: none;
+}
+
+.cp-modal-input:focus,
+.cp-modal-textarea:focus {
+  outline: none;
+  box-shadow: none;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.cp-modal-input::placeholder,
+.cp-modal-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}

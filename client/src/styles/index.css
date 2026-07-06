@@ -1,0 +1,56 @@
+@import url('https://googleapis.com');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+body {
+  font-family:
+    Inter,
+    system-ui,
+    sans-serif;
+}
+
+input::placeholder {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+
+input:focus {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.4);
+}
+.animated-underline-btn {
+  position: relative;
+  display: inline-block;
+  color: #D4C5C7;
+  transition: color 0.3s ease;
+}
+
+.animated-underline-btn::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  transform: scaleX(0); 
+  height: 2px;
+  bottom: -2px; 
+  left: 0;
+  background-color: #F7F4F5; 
+  transform-origin: bottom left; 
+  transition: transform 0.25s ease-out; 
+}
+
+.animated-underline-btn:hover::after {
+  transform: scaleX(1); 
+}
+
+.animated-underline-btn:hover {
+  color: #FFF;
+}
