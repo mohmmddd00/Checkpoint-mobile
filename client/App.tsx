@@ -5,6 +5,7 @@ import Toast from "react-native-toast-message";
 import { RegisterScreen } from "./src/screens/RegistrationScreen";
 import { HomeScreen } from "./src/screens/HomeScreen";
 import { GameScreen } from "./src/screens/GameScreen";
+import { ProfileScreen } from "./src/screens/ProfileScreen";
 
 export type RootStackParamList = {
   Login: undefined;
@@ -23,6 +24,11 @@ export type RootStackParamList = {
   Game: { slug: string; game: any };
   Review: { id: string };
   PublicVault: { id: string };
+  Stats: undefined;
+  VaultCreation: undefined;
+  MyVaults: undefined;
+  Reviews: undefined;
+  SavedVaults: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -39,6 +45,7 @@ export default function App() {
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Game" component={GameScreen} />
+        <Stack.Screen name="Profile" component={ProfileScreen} />
       </Stack.Navigator>
     </NavigationContainer>
     <Toast />
