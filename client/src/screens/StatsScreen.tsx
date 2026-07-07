@@ -11,6 +11,8 @@ import { DashboardLayout } from "../components/DashboardLayout";
 import { FloppyDiskIcon } from "../components/FloppyDiskIcon";
 import { StatsPageSkeleton } from "../LoadingScreens/StatsPageSkeleton";
 import { useStats, type UserStats, type MonthEntry, type YearEntry, type MostLikedReview, type MostSavedVault } from "../hooks/useStats";
+import { useFadeUp } from "../hooks/useFadeUp";
+import { Animated } from "react-native";
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -437,101 +439,109 @@ function StatsContent() {
       ) : stats.totalLogged === 0 ? (
         <EmptyState />
       ) : (
-        <>
-          {/* ── OVERVIEW PILLS ── */}
-          <View style={s.section}>
-            <SectionHeading text="Overview" />
-            <View style={s.pillsGrid}>
-              <StatPill value={stats.totalLogged}             label="Games Logged" accent />
-              <StatPill value={stats.completed}               label="Completed" />
-              <StatPill value={stats.playing}                 label="Playing" />
-              <StatPill value={stats.dropped}                 label="Dropped" />
-              <StatPill value={stats.averageRating ?? "—"}   label="Avg Rating" />
-              <StatPill value={stats.totalReviews}            label="Reviews Written" />
-              <StatPill value={stats.mostActiveMonth ?? "—"} label="Best Month" />
-              <StatPill value={stats.mostActiveYear ?? "—"}  label="Best Year" />
-              <StatPill value={stats.favoriteGenre ?? "—"}   label="Fav Genre" accent />
-            </View>
-          </View>
-
-          {/* ── HIGHLIGHTS ── */}
-          {(stats.highestRated || stats.lowestRated) && (
-            <View style={s.section}>
-              <SectionHeading text="Highlights" />
-              <Card>
-                {stats.highestRated && <GameHighlightCard game={stats.highestRated} label="Highest Rated" />}
-                {stats.lowestRated && stats.lowestRated.title !== stats.highestRated?.title && (
-                  <View style={{ marginTop: 12 }}>
-                    <GameHighlightCard game={stats.lowestRated} label="Lowest Rated" />
-                  </View>
-                )}
-              </Card>
-            </View>
-          )}
-
-          {/* ── ACTIVITY ── */}
-          <View style={s.section}>
-            <SectionHeading text="Activity" />
-            <ActivitySparkline data={stats.activityByMonth} />
-          </View>
-
-          {/* ── YEARLY + RATING ── */}
-          <View style={s.section}>
-            {stats.activityByYear.length > 1 && <YearlyChart data={stats.activityByYear} />}
-            <RatingDistributionChart data={stats.ratingDistribution} />
-          </View>
-
-          {/* ── BREAKDOWN ── */}
-          <View style={s.section}>
-            <SectionHeading text="Breakdown" />
-            <StatusRing
-              completed={stats.statusBreakdown.Completed}
-              playing={stats.statusBreakdown.Playing}
-              dropped={stats.statusBreakdown.Dropped}
-            />
-            <Card style={{ marginBottom: 12 }}>
-              <SectionLabel text="Platform Breakdown" />
-              {stats.platformBreakdown.length === 0 ? (
-                <Text style={{ color: C.textGhost, fontSize: 13 }}>No platform data.</Text>
-              ) : (
-                <View style={{ gap: 16 }}>
-                  {stats.platformBreakdown.slice(0, 6).map((p) => (
-                    <HBar key={p.platform} label={p.platform} count={p.count} max={stats.platformBreakdown[0].count} />
-                  ))}
-                </View>
-              )}
-            </Card>
-            {stats.genreBreakdown.length > 0 && (
-              <Card>
-                <SectionLabel text="Genre Breakdown" />
-                <View style={{ gap: 16 }}>
-                  {stats.genreBreakdown.slice(0, 8).map((g) => (
-                    <HBar key={g.genre} label={g.genre} count={g.count} max={stats.genreBreakdown[0].count} />
-                  ))}
-                </View>
-              </Card>
-            )}
-          </View>
-
-          {/* ── RECENT ACTIVITY ── */}
-          {stats.recentActivity.length > 0 && (
-            <View style={s.section}>
-              <SectionHeading text="Recent Activity" />
-              <RecentActivityList entries={stats.recentActivity} />
-            </View>
-          )}
-
-          {/* ── POPULARITY ── */}
-          {(stats.mostLikedReview || stats.mostSavedVault) && (
-            <View style={s.section}>
-              <SectionHeading text="Popularity" />
-              {stats.mostLikedReview && <MostLikedReviewCard data={stats.mostLikedReview} />}
-              {stats.mostSavedVault  && <MostSavedVaultCard  data={stats.mostSavedVault} />}
-            </View>
-          )}
-        </>
+        <StatsData stats={stats} />
       )}
     </ScrollView>
+  );
+}
+
+function StatsData({ stats }: { stats: UserStats }) {
+  const { opacity, translateY } = useFadeUp();
+
+  return (
+    <Animated.View style={{ opacity, transform: [{ translateY }] }}>
+      {/* ── OVERVIEW PILLS ── */}
+      <View style={s.section}>
+        <SectionHeading text="Overview" />
+        <View style={s.pillsGrid}>
+          <StatPill value={stats.totalLogged}             label="Games Logged" accent />
+          <StatPill value={stats.completed}               label="Completed" />
+          <StatPill value={stats.playing}                 label="Playing" />
+          <StatPill value={stats.dropped}                 label="Dropped" />
+          <StatPill value={stats.averageRating ?? "—"}   label="Avg Rating" />
+          <StatPill value={stats.totalReviews}            label="Reviews Written" />
+          <StatPill value={stats.mostActiveMonth ?? "—"} label="Best Month" />
+          <StatPill value={stats.mostActiveYear ?? "—"}  label="Best Year" />
+          <StatPill value={stats.favoriteGenre ?? "—"}   label="Fav Genre" accent />
+        </View>
+      </View>
+
+      {/* ── HIGHLIGHTS ── */}
+      {(stats.highestRated || stats.lowestRated) && (
+        <View style={s.section}>
+          <SectionHeading text="Highlights" />
+          <Card>
+            {stats.highestRated && <GameHighlightCard game={stats.highestRated} label="Highest Rated" />}
+            {stats.lowestRated && stats.lowestRated.title !== stats.highestRated?.title && (
+              <View style={{ marginTop: 12 }}>
+                <GameHighlightCard game={stats.lowestRated} label="Lowest Rated" />
+              </View>
+            )}
+          </Card>
+        </View>
+      )}
+
+      {/* ── ACTIVITY ── */}
+      <View style={s.section}>
+        <SectionHeading text="Activity" />
+        <ActivitySparkline data={stats.activityByMonth} />
+      </View>
+
+      {/* ── YEARLY + RATING ── */}
+      <View style={s.section}>
+        {stats.activityByYear.length > 1 && <YearlyChart data={stats.activityByYear} />}
+        <RatingDistributionChart data={stats.ratingDistribution} />
+      </View>
+
+      {/* ── BREAKDOWN ── */}
+      <View style={s.section}>
+        <SectionHeading text="Breakdown" />
+        <StatusRing
+          completed={stats.statusBreakdown.Completed}
+          playing={stats.statusBreakdown.Playing}
+          dropped={stats.statusBreakdown.Dropped}
+        />
+        <Card style={{ marginBottom: 12 }}>
+          <SectionLabel text="Platform Breakdown" />
+          {stats.platformBreakdown.length === 0 ? (
+            <Text style={{ color: C.textGhost, fontSize: 13 }}>No platform data.</Text>
+          ) : (
+            <View style={{ gap: 16 }}>
+              {stats.platformBreakdown.slice(0, 6).map((p) => (
+                <HBar key={p.platform} label={p.platform} count={p.count} max={stats.platformBreakdown[0].count} />
+              ))}
+            </View>
+          )}
+        </Card>
+        {stats.genreBreakdown.length > 0 && (
+          <Card>
+            <SectionLabel text="Genre Breakdown" />
+            <View style={{ gap: 16 }}>
+              {stats.genreBreakdown.slice(0, 8).map((g) => (
+                <HBar key={g.genre} label={g.genre} count={g.count} max={stats.genreBreakdown[0].count} />
+              ))}
+            </View>
+          </Card>
+        )}
+      </View>
+
+      {/* ── RECENT ACTIVITY ── */}
+      {stats.recentActivity.length > 0 && (
+        <View style={s.section}>
+          <SectionHeading text="Recent Activity" />
+          <RecentActivityList entries={stats.recentActivity} />
+        </View>
+      )}
+
+      {/* ── POPULARITY ── */}
+      {(stats.mostLikedReview || stats.mostSavedVault) && (
+        <View style={s.section}>
+          <SectionHeading text="Popularity" />
+          {stats.mostLikedReview && <MostLikedReviewCard data={stats.mostLikedReview} />}
+          {stats.mostSavedVault  && <MostSavedVaultCard  data={stats.mostSavedVault} />}
+        </View>
+      )}
+    </Animated.View>
   );
 }
 

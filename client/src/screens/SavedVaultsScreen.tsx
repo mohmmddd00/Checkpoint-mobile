@@ -15,10 +15,10 @@ import { routes } from "../navigation/routes";
 import { FloppyDiskIcon } from "../components/FloppyDiskIcon";
 import { useUnsaveAnimation } from "../hooks/useUnsaveAnimation";
 import { DashboardLayout } from "../components/DashboardLayout";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { SavedVaultsPageSkeleton } from "../LoadingScreens/SavedVaultsPageSkeleton";
 import { storage } from "../utils/storage";
 import Toast from "react-native-toast-message";
+import { useFadeUp } from "../hooks/useFadeUp";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "";
 const STATIC_BASE_URL = API_URL.replace(/\/api\/?$/, "");
@@ -323,46 +323,61 @@ function SavedVaultsContent() {
     return <SavedVaultsPageSkeleton />;
   }
 
+  return <SavedVaultsLoaded vaults={vaults} onUnsave={handleUnsave} />;
+}
+
+function SavedVaultsLoaded({
+  vaults,
+  onUnsave,
+}: {
+  vaults: SavedVault[];
+  onUnsave: (id: string) => void;
+}) {
+  const navigation = useNavigation<Nav>();
+  const { opacity, translateY } = useFadeUp();
+
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.scrollContent}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* ── BACK ── */}
-      <TouchableOpacity
-        onPress={() => navigation.navigate("Profile")}
-        style={styles.backButton}
+    <Animated.View style={[{ flex: 1 }, { opacity, transform: [{ translateY }] }]}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.backText}>← Back to profile</Text>
-      </TouchableOpacity>
+        {/* ── BACK ── */}
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Profile")}
+          style={styles.backButton}
+        >
+          <Text style={styles.backText}>← Back to profile</Text>
+        </TouchableOpacity>
 
-      {/* ── HEADER ── */}
-      <View style={styles.header}>
-        <Text style={styles.pageTitle}>Saved Vaults</Text>
-        <Text style={styles.pageSubtitle}>
-          {vaults.length > 0
-            ? `${vaults.length} vault${vaults.length !== 1 ? "s" : ""} saved`
-            : "Vaults you save from the community will appear here."}
-        </Text>
-      </View>
-
-      <View style={styles.divider} />
-
-      {vaults.length === 0 ? (
-        <EmptyState />
-      ) : (
-        <View style={styles.list}>
-          {vaults.map((vault) => (
-            <SavedVaultCard
-              key={vault._id}
-              vault={vault}
-              onUnsave={handleUnsave}
-            />
-          ))}
+        {/* ── HEADER ── */}
+        <View style={styles.header}>
+          <Text style={styles.pageTitle}>Saved Vaults</Text>
+          <Text style={styles.pageSubtitle}>
+            {vaults.length > 0
+              ? `${vaults.length} vault${vaults.length !== 1 ? "s" : ""} saved`
+              : "Vaults you save from the community will appear here."}
+          </Text>
         </View>
-      )}
-    </ScrollView>
+
+        <View style={styles.divider} />
+
+        {vaults.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <View style={styles.list}>
+            {vaults.map((vault) => (
+              <SavedVaultCard
+                key={vault._id}
+                vault={vault}
+                onUnsave={onUnsave}
+              />
+            ))}
+          </View>
+        )}
+      </ScrollView>
+    </Animated.View>
   );
 }
 
@@ -370,9 +385,9 @@ function SavedVaultsContent() {
 
 export function SavedVaultsScreen() {
   return (
-    <View style={{ flex: 1, backgroundColor: "#0D0204" }}>
+    <DashboardLayout>
       <SavedVaultsContent />
-    </View>
+    </DashboardLayout>
   );
 }
 

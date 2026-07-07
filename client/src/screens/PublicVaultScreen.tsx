@@ -15,6 +15,8 @@ import { DashboardLayout } from "../components/DashboardLayout";
 import { PublicVaultPageSkeleton } from "../LoadingScreens/PublicVaultPageSkeleton";
 import { storage } from "../utils/storage";
 import Toast from "react-native-toast-message";
+import { useFadeUp } from "../hooks/useFadeUp";
+import { Animated } from "react-native";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "";
 const STATIC_BASE_URL = API_URL.replace(/\/api\/?$/, "");
@@ -219,6 +221,21 @@ function PublicVaultContent() {
     );
   }
 
+  return <PublicVaultLoaded vault={vault} currentUserId={currentUserId} onDelete={handleDelete} />;
+}
+
+function PublicVaultLoaded({
+  vault,
+  currentUserId,
+  onDelete,
+}: {
+  vault: PublicVault;
+  currentUserId: string | null;
+  onDelete: () => void;
+}) {
+  const navigation = useNavigation<Nav>();
+  const { opacity, translateY } = useFadeUp();
+
   const isOwner = currentUserId && vault.user._id === currentUserId;
 
   const createdDate = new Date(vault.createdAt).toLocaleDateString("en-US", {
@@ -236,6 +253,7 @@ function PublicVaultContent() {
     : null;
 
   return (
+    <Animated.View style={[{ flex: 1 }, { opacity, transform: [{ translateY }] }]}>
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.scrollContent}
@@ -248,7 +266,7 @@ function PublicVaultContent() {
         </TouchableOpacity>
 
         {isOwner && (
-          <TouchableOpacity onPress={handleDelete} style={styles.deleteBtn}>
+          <TouchableOpacity onPress={onDelete} style={styles.deleteBtn}>
             <Text style={styles.deleteBtnText}>Delete</Text>
           </TouchableOpacity>
         )}
@@ -296,6 +314,7 @@ function PublicVaultContent() {
         </View>
       )}
     </ScrollView>
+    </Animated.View>
   );
 }
 
