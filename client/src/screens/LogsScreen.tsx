@@ -13,7 +13,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DashboardLayout } from "../components/DashboardLayout";
 import { LogCardMenu } from "../components/LogCardMenu";
 import { LogsScreenSkeleton } from "../LoadingScreens/LogsPageSkeleton";
-import { useFadeUp } from "../hooks/useFadeUp";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -175,7 +174,8 @@ function LogsContent() {
   const [logs, setLogs] = useState<LoggedGame[]>([]);
   const [loading, setLoading] = useState(true);
   const [logSearch, setLogSearch] = useState("");
-  const { opacity, translateY } = useFadeUp();
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(12)).current;
 
   useEffect(() => {
     const fetchLogs = async () => {
@@ -213,6 +213,10 @@ function LogsContent() {
         console.error("Error loading logs:", err);
       } finally {
         setLoading(false);
+        Animated.parallel([
+          Animated.timing(opacity, { toValue: 1, duration: 350, useNativeDriver: true }),
+          Animated.timing(translateY, { toValue: 0, duration: 350, useNativeDriver: true }),
+        ]).start();
       }
     };
     fetchLogs();
