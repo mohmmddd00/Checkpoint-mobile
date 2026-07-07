@@ -69,14 +69,12 @@ function VaultGameCard({ game }: { game: VaultGame }) {
     <TouchableOpacity
       style={styles.gameCardWrapper}
       activeOpacity={0.85}
-      onPressIn={() => {
-        setPressed(true);
-        navigation.navigate("Game", {
-          slug: game.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
-          game,
-        });
-      }}
+      onPressIn={() => setPressed(true)}
       onPressOut={() => setPressed(false)}
+      onPress={() => navigation.navigate("Game", {
+        slug: game.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+        game,
+      })}
     >
       <View style={[styles.gameCard, pressed && styles.gameCardPressed]}>
         {game.coverImage ? (
