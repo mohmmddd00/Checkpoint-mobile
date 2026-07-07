@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { View, Animated, StyleSheet } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { ScrollView } from "react-native";
 
 // ─── SHIMMER BONE ─────────────────────────────────────────────────────────────
 
@@ -85,8 +85,7 @@ function SkeletonCard() {
 
 export function AllUserReviewsSkeleton() {
   return (
-    <SafeAreaView style={s.root}>
-      <View style={s.content}>
+    <ScrollView style={s.root} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         {/* Back button */}
         <Bone width={120} height={13} style={{ marginBottom: 24, borderRadius: 4 }} />
 
@@ -102,8 +101,7 @@ export function AllUserReviewsSkeleton() {
             <SkeletonCard key={i} />
           ))}
         </View>
-      </View>
-    </SafeAreaView>
+      </ScrollView>
   );
 }
 

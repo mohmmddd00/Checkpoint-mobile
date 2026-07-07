@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   Animated,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { DashboardLayout } from "../components/DashboardLayout";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -149,12 +149,10 @@ export function AllUserReviewsScreen() {
     load();
   }, []);
 
-  if (loading) {
-    return <AllUserReviewsSkeleton />;
-  }
-
   return (
-    <SafeAreaView style={s.root}>
+    <DashboardLayout>
+    {loading ? <AllUserReviewsSkeleton /> : (
+    <View style={s.root}>
     <Animated.View style={[{ opacity, transform: [{ translateY }] }, { flex: 1 }]}>
       <FlatList
         data={reviews}
@@ -192,7 +190,9 @@ export function AllUserReviewsScreen() {
         ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
       />
     </Animated.View>
-    </SafeAreaView>
+    </View>
+    )}
+    </DashboardLayout>
   );
 }
 
@@ -201,7 +201,7 @@ export function AllUserReviewsScreen() {
 const s = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: "#0A0105",
+    backgroundColor: "#0D0204",
   },
   listContent: {
     maxWidth: 750,
