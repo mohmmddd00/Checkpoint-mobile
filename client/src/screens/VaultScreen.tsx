@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   View, Text, ScrollView, TouchableOpacity,
   Image, StyleSheet,
@@ -81,23 +82,24 @@ function VaultContent() {
   const [vault, setVault] = useState<Vault | null>(passedVault ?? null);
   const [loading, setLoading] = useState(!passedVault);
 
-  useEffect(() => {
-    if (passedVault) return; // already have data, skip fetch
-    const load = async () => {
-      try {
-        const token = await storage.getToken();
-        const res = await fetch(`${API_URL}/vaults/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) setVault(await res.json());
-      } catch (err) {
-        console.error("Failed to load vault:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [id]);
+  useFocusEffect(
+    useCallback(() => {
+      const load = async () => {
+        try {
+          const token = await storage.getToken();
+          const res = await fetch(`${API_URL}/vaults/${id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.ok) setVault(await res.json());
+        } catch (err) {
+          console.error("Failed to load vault:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      load();
+    }, [id])
+  );
 
   const handleDelete = async () => {
     if (!vault) return;
