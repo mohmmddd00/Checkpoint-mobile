@@ -14,6 +14,7 @@ import { MyVaultsScreen } from "./src/screens/MyVaultsScreen";
 import { EditVaultScreen } from "./src/screens/EditVaultScreen";
 import { VaultCreationScreen } from "./src/screens/VaultCreationScreen";
 import { AllUserReviewsScreen } from "./src/screens/AllUserReviewsScreen";
+import { ReviewScreen } from "./src/screens/ReviewScreen";
 
 export type RootStackParamList = {
   Login: undefined;
@@ -65,6 +66,7 @@ export default function App() {
         <Stack.Screen name="EditVault" component={EditVaultScreen} />
         <Stack.Screen name="VaultCreation" component={VaultCreationScreen} />
         <Stack.Screen name="Reviews" component={AllUserReviewsScreen} />
+        <Stack.Screen name="Review" component={ReviewScreen} />
       </Stack.Navigator>
     </NavigationContainer>
     <Toast />
