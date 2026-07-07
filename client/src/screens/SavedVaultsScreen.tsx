@@ -13,7 +13,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../App";
 import { routes } from "../navigation/routes";
 import { FloppyDiskIcon } from "../components/FloppyDiskIcon";
-import { useUnsaveAnimation } from "../hooks/UseUnsaveAnimation";
+import { useUnsaveAnimation } from "../hooks/useUnsaveAnimation";
 import { DashboardLayout } from "../components/DashboardLayout";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SavedVaultsPageSkeleton } from "../LoadingScreens/SavedVaultsPageSkeleton";
