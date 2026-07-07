@@ -62,7 +62,7 @@ function ReviewCard({ log }: { log: GameLog }) {
       activeOpacity={0.75}
       onPressIn={() => setPressed(true)}
       onPressOut={() => setPressed(false)}
-      onPress={() => navigation.navigate("Review", { id: log._id })}
+      onPress={() => navigation.navigate("Review", { id: log._id, log })}
       style={[s.card, pressed && s.cardPressed]}
     >
       {/* Cover image */}

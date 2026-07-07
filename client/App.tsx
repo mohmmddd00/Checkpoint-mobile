@@ -31,7 +31,7 @@ export type RootStackParamList = {
   Settings: undefined;
   QuickLog: undefined;
   Game: { slug: string; game: any };
-  Review: { id: string };
+  Review: { id: string; log?: any };
   PublicVault: { id: string };
   Stats: undefined;
   VaultCreation: undefined;

@@ -197,7 +197,7 @@ function ReviewCard({ log }: { log: ReviewLogEntry }) {
   return (
     <TouchableOpacity
       style={s.reviewCard}
-      onPress={() => navigation.navigate("Review", { id: log._id })}
+      onPress={() => navigation.navigate("Review", { id: log._id, log })}
       activeOpacity={0.8}
     >
       <View style={s.reviewCover}>

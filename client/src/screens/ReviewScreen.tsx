@@ -41,10 +41,10 @@ interface ReviewLog {
 export function ReviewScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<ReviewRoute>();
-  const { id } = route.params;
+  const { id, log: passedLog } = route.params;
 
-  const [log, setLog] = useState<ReviewLog | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [log, setLog] = useState<ReviewLog | null>(passedLog ?? null);
+  const [loading, setLoading] = useState(!passedLog);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
