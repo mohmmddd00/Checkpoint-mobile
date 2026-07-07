@@ -237,7 +237,7 @@ function VaultProfileCard({ vault }: { vault: Vault }) {
   return (
     <TouchableOpacity
       style={s.vaultCard}
-      onPressIn={() => navigation.navigate("Vault", { id: vault._id, vault })}
+      onPress={() => navigation.navigate("Vault", { id: vault._id, vault })}
       activeOpacity={0.85}
     >
       {/* 2x2 collage */}
@@ -277,7 +277,7 @@ function SectionHeader({ title }: { title: string }) {
 
 function OutlineButton({ label, onPress }: { label: string; onPress: () => void }) {
   return (
-    <TouchableOpacity style={s.outlineBtn} onPressIn={onPress} activeOpacity={0.85}>
+    <TouchableOpacity style={s.outlineBtn} onPress={onPress} activeOpacity={0.85}>
       <Text style={s.outlineBtnText}>{label}</Text>
     </TouchableOpacity>
   );

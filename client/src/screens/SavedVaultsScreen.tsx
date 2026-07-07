@@ -203,10 +203,13 @@ function SavedVaultCard({
     >
       <TouchableOpacity
         activeOpacity={0.85}
+        onPress={() => {
+          if (animState !== "idle") return;
+          navigation.navigate("PublicVault", { id: vault._id });
+        }}
         onPressIn={() => {
           if (animState !== "idle") return;
           setPressed(true);
-          navigation.navigate("PublicVault", { id: vault._id });
         }}
         onPressOut={() => setPressed(false)}
         disabled={animState !== "idle"}
