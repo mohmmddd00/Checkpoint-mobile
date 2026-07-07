@@ -6,7 +6,6 @@ import {
   Image,
   TouchableOpacity,
   StyleSheet,
-  ActivityIndicator,
   Animated,
 } from "react-native";
 import { DashboardLayout } from "../components/DashboardLayout";
@@ -109,11 +108,52 @@ function ReviewCard({ log }: { log: GameLog }) {
 
 // ─── SCREEN ───────────────────────────────────────────────────────────────────
 
-export function AllUserReviewsScreen() {
+function ReviewsContent({ reviews }: { reviews: GameLog[] }) {
   const navigation = useNavigation<Nav>();
+  const { opacity, translateY } = useFadeUp();
+
+  return (
+    <View style={s.root}>
+    <Animated.View style={[{ opacity, transform: [{ translateY }] }, { flex: 1 }]}>
+      <FlatList
+        data={reviews}
+        keyExtractor={(item) => item._id}
+        contentContainerStyle={s.listContent}
+        ListHeaderComponent={
+          <>
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={s.backBtn}
+            >
+              <Text style={s.backBtnText}>← Back to profile</Text>
+            </TouchableOpacity>
+            <Text style={s.heading}>All your reviews</Text>
+            <Text style={s.subheading}>
+              {reviews.length === 0
+                ? "You haven't written any reviews yet."
+                : `${reviews.length} review${reviews.length === 1 ? "" : "s"}`}
+            </Text>
+            <View style={s.divider} />
+          </>
+        }
+        ListEmptyComponent={
+          <View style={s.emptyWrap}>
+            <Text style={s.emptyText}>
+              Head over to your logs and add a review to a game.
+            </Text>
+          </View>
+        }
+        renderItem={({ item }) => <ReviewCard log={item} />}
+        ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
+      />
+    </Animated.View>
+    </View>
+  );
+}
+
+export function AllUserReviewsScreen() {
   const [reviews, setReviews] = useState<GameLog[]>([]);
   const [loading, setLoading] = useState(true);
-  const { opacity, translateY } = useFadeUp();
 
   useEffect(() => {
     const load = async () => {
@@ -151,47 +191,7 @@ export function AllUserReviewsScreen() {
 
   return (
     <DashboardLayout>
-    {loading ? <AllUserReviewsSkeleton /> : (
-    <View style={s.root}>
-    <Animated.View style={[{ opacity, transform: [{ translateY }] }, { flex: 1 }]}>
-      <FlatList
-        data={reviews}
-        keyExtractor={(item) => item._id}
-        contentContainerStyle={s.listContent}
-        ListHeaderComponent={
-          <>
-            {/* Back button */}
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              style={s.backBtn}
-            >
-              <Text style={s.backBtnText}>← Back to profile</Text>
-            </TouchableOpacity>
-
-            {/* Header */}
-            <Text style={s.heading}>All your reviews</Text>
-            <Text style={s.subheading}>
-              {reviews.length === 0
-                ? "You haven't written any reviews yet."
-                : `${reviews.length} review${reviews.length === 1 ? "" : "s"}`}
-            </Text>
-
-            <View style={s.divider} />
-          </>
-        }
-        ListEmptyComponent={
-          <View style={s.emptyWrap}>
-            <Text style={s.emptyText}>
-              Head over to your logs and add a review to a game.
-            </Text>
-          </View>
-        }
-        renderItem={({ item }) => <ReviewCard log={item} />}
-        ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
-      />
-    </Animated.View>
-    </View>
-    )}
+      {loading ? <AllUserReviewsSkeleton /> : <ReviewsContent reviews={reviews} />}
     </DashboardLayout>
   );
 }
