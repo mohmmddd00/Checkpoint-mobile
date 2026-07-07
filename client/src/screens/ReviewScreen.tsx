@@ -7,7 +7,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { DashboardLayout } from "../components/DashboardLayout";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -96,21 +96,21 @@ export function ReviewScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={s.root}>
+      <DashboardLayout>
         <View style={s.loadingWrap}>
           <ActivityIndicator color="#9E1B32" />
         </View>
-      </SafeAreaView>
+      </DashboardLayout>
     );
   }
 
   if (!log) {
     return (
-      <SafeAreaView style={s.root}>
+      <DashboardLayout>
         <View style={s.loadingWrap}>
           <Text style={s.notFoundText}>Review not found.</Text>
         </View>
-      </SafeAreaView>
+      </DashboardLayout>
     );
   }
 
@@ -131,7 +131,7 @@ export function ReviewScreen() {
   const isOwnReview = !!(currentUserId && logUserId === currentUserId);
 
   return (
-    <SafeAreaView style={s.root}>
+    <DashboardLayout>
       <Animated.View style={[{ flex: 1 }, { opacity, transform: [{ translateY }] }]}>
         <ScrollView contentContainerStyle={s.scrollContent}>
           {/* Back + delete row */}
@@ -169,14 +169,14 @@ export function ReviewScreen() {
           <ReviewEngagement gameLogId={log._id} />
         </ScrollView>
       </Animated.View>
-    </SafeAreaView>
+    </DashboardLayout>
   );
 }
 
 const s = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: "#0A0105",
+    backgroundColor: "#0D0204",
   },
   scrollContent: {
     maxWidth: 750,
