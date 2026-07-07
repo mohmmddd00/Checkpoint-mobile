@@ -6,6 +6,8 @@ import { RegisterScreen } from "./src/screens/RegistrationScreen";
 import { HomeScreen } from "./src/screens/HomeScreen";
 import { GameScreen } from "./src/screens/GameScreen";
 import { ProfileScreen } from "./src/screens/ProfileScreen";
+import { SavedVaultsScreen } from "./src/screens/SavedVaultsScreen";
+import { PublicVaultScreen } from "./src/screens/PublicVaultScreen";
 
 export type RootStackParamList = {
   Login: undefined;
@@ -29,6 +31,7 @@ export type RootStackParamList = {
   MyVaults: undefined;
   Reviews: undefined;
   SavedVaults: undefined;
+  CommunityVaults: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -46,6 +49,8 @@ export default function App() {
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Game" component={GameScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen name="SavedVaults" component={SavedVaultsScreen} />
+        <Stack.Screen name="PublicVault" component={PublicVaultScreen} />
       </Stack.Navigator>
     </NavigationContainer>
     <Toast />

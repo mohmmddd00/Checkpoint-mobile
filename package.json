@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "expo": "^57.0.2",
-    "react-hot-toast": "^2.6.0"
+    "react-hot-toast": "^2.6.0",
+    "react-native-svg": "15.15.4"
   }
 }
