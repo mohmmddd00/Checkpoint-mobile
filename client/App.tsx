@@ -13,6 +13,7 @@ import { VaultScreen } from "./src/screens/VaultScreen";
 import { MyVaultsScreen } from "./src/screens/MyVaultsScreen";
 import { EditVaultScreen } from "./src/screens/EditVaultScreen";
 import { VaultCreationScreen } from "./src/screens/VaultCreationScreen";
+import { LogsScreen } from "./src/screens/LogsScreen";
 import { AllUserReviewsScreen } from "./src/screens/AllUserReviewsScreen";
 import { ReviewScreen } from "./src/screens/ReviewScreen";
 
@@ -65,6 +66,7 @@ export default function App() {
         <Stack.Screen name="MyVaults" component={MyVaultsScreen} />
         <Stack.Screen name="EditVault" component={EditVaultScreen} />
         <Stack.Screen name="VaultCreation" component={VaultCreationScreen} />
+        <Stack.Screen name="Logs" component={LogsScreen} />
         <Stack.Screen name="Reviews" component={AllUserReviewsScreen} />
         <Stack.Screen name="Review" component={ReviewScreen} />
       </Stack.Navigator>
