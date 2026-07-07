@@ -277,7 +277,7 @@ function SectionHeader({ title }: { title: string }) {
 
 function OutlineButton({ label, onPress }: { label: string; onPress: () => void }) {
   return (
-    <TouchableOpacity style={s.outlineBtn} onPress={onPress} activeOpacity={0.8}>
+    <TouchableOpacity style={s.outlineBtn} onPressIn={onPress} activeOpacity={0.85}>
       <Text style={s.outlineBtnText}>{label}</Text>
     </TouchableOpacity>
   );

@@ -8,6 +8,7 @@ import { GameScreen } from "./src/screens/GameScreen";
 import { ProfileScreen } from "./src/screens/ProfileScreen";
 import { SavedVaultsScreen } from "./src/screens/SavedVaultsScreen";
 import { PublicVaultScreen } from "./src/screens/PublicVaultScreen";
+import { StatsScreen } from "./src/screens/StatsScreen";
 
 export type RootStackParamList = {
   Login: undefined;
@@ -51,6 +52,7 @@ export default function App() {
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="SavedVaults" component={SavedVaultsScreen} />
         <Stack.Screen name="PublicVault" component={PublicVaultScreen} />
+        <Stack.Screen name="Stats" component={StatsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
     <Toast />
