@@ -120,12 +120,6 @@ export function ReviewScreen() {
       })
     : "Release date unknown";
 
-  const editedLabel = log.editedAt
-    ? `edited ${new Date(log.editedAt).toLocaleDateString("en-US", {
-        year: "numeric", month: "short", day: "numeric",
-      })}`
-    : null;
-
   const logUserId =
     typeof log.user === "object" ? log.user?._id?.toString() : log.user?.toString();
   const isOwnReview = !!(currentUserId && logUserId === currentUserId);
@@ -159,7 +153,7 @@ export function ReviewScreen() {
               title={log.title}
               formattedDate={formattedDate}
               rating={log.rating}
-              editedLabel={editedLabel}
+              editedAt={log.editedAt}
             >
               <Text style={s.reviewText}>{log.review}</Text>
             </ReviewCoverCard>

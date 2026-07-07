@@ -1,12 +1,13 @@
 import React from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
+import { EditedTag } from "./EditedTag";
 
 interface ReviewCoverCardProps {
   coverImage: string | null;
   title: string;
   formattedDate: string;
   rating: number;
-  editedLabel?: string | null;
+  editedAt?: string | null;
   children: React.ReactNode;
 }
 
@@ -15,7 +16,7 @@ export function ReviewCoverCard({
   title,
   formattedDate,
   rating,
-  editedLabel,
+  editedAt,
   children,
 }: ReviewCoverCardProps) {
   return (
@@ -38,7 +39,7 @@ export function ReviewCoverCard({
             <Text style={s.title}>{title}</Text>
             <View style={s.metaRow}>
               <Text style={s.date}>{formattedDate}</Text>
-              {editedLabel ? <Text style={s.editedTag}>{editedLabel}</Text> : null}
+              <EditedTag editedAt={editedAt} />
             </View>
           </View>
           <Text style={s.rating}>★ {rating}/10</Text>
@@ -107,7 +108,6 @@ const s = StyleSheet.create({
     alignItems: "center",
     gap: 4,
     marginTop: 6,
-    flexWrap: "wrap",
   },
   date: {
     color: "#8A6D73",

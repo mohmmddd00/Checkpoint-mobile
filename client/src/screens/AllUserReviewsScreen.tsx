@@ -15,6 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { RootStackParamList } from "../../App";
 import { AllUserReviewsSkeleton } from "../LoadingScreens/AllUserReviewsSkeleton";
 import { useFadeUp } from "../hooks/useFadeUp";
+import { EditedTag } from "../components/EditedTag";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -31,15 +32,6 @@ interface GameLog {
   editedAt?: string | null;
   coverImage?: string | null;
   releasedDate?: string | null;
-}
-
-// ─── EDITED TAG ───────────────────────────────────────────────────────────────
-
-function EditedTag({ editedAt }: { editedAt?: string | null }) {
-  if (!editedAt) return null;
-  return (
-    <Text style={s.editedTag}>edited</Text>
-  );
 }
 
 // ─── REVIEW CARD ──────────────────────────────────────────────────────────────
