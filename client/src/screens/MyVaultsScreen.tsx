@@ -11,6 +11,8 @@ import { DeleteConfirmMenu } from "../components/DeleteConfirmMenu";
 import { MyVaultsPageSkeleton } from "../LoadingScreens/MyVaultsPageSkeleton";
 import { storage } from "../utils/storage";
 import Toast from "react-native-toast-message";
+import { useFadeUp } from "../hooks/useFadeUp";
+import { Animated } from "react-native";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "";
 
@@ -185,41 +187,12 @@ function EmptyState() {
 
 // ─── PAGE CONTENT ────────────────────────────────────────────────────────────
 
-function MyVaultsContent() {
+function MyVaultsLoaded({ vaults, setVaults }: { vaults: Vault[]; setVaults: React.Dispatch<React.SetStateAction<Vault[]>> }) {
   const navigation = useNavigation<Nav>();
-  const [vaults, setVaults] = useState<Vault[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const token = await storage.getToken();
-        const res = await fetch(`${API_URL}/vaults`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) setVaults(await res.json());
-      } catch (err) {
-        console.error("Failed to load vaults:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, []);
-
-  if (loading) {
-    return (
-      <ScrollView
-        style={s.container}
-        contentContainerStyle={{ flexGrow: 1 }}
-        showsVerticalScrollIndicator={false}
-      >
-        <MyVaultsPageSkeleton />
-      </ScrollView>
-    );
-  }
+  const { opacity, translateY } = useFadeUp();
 
   return (
+    <Animated.View style={[{ flex: 1 }, { opacity, transform: [{ translateY }] }]}>
     <ScrollView
       style={s.container}
       contentContainerStyle={s.scrollContent}
@@ -267,7 +240,44 @@ function MyVaultsContent() {
         </View>
       )}
     </ScrollView>
+    </Animated.View>
   );
+}
+
+function MyVaultsContent() {
+  const [vaults, setVaults] = useState<Vault[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const token = await storage.getToken();
+        const res = await fetch(`${API_URL}/vaults`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) setVaults(await res.json());
+      } catch (err) {
+        console.error("Failed to load vaults:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  if (loading) {
+    return (
+      <ScrollView
+        style={s.container}
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <MyVaultsPageSkeleton />
+      </ScrollView>
+    );
+  }
+
+  return <MyVaultsLoaded vaults={vaults} setVaults={setVaults} />;
 }
 
 // ─── SCREEN EXPORT ────────────────────────────────────────────────────────────

@@ -9,6 +9,8 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../App";
 import { DashboardLayout } from "../components/DashboardLayout";
 import { storage } from "../utils/storage";
+import { useFadeUp } from "../hooks/useFadeUp";
+import { Animated } from "react-native";
 import { DeleteConfirmMenu } from "../components/DeleteConfirmMenu";
 import Toast from "react-native-toast-message";
 
@@ -140,7 +142,10 @@ function VaultContent() {
       })
     : null;
 
+  const { opacity, translateY } = useFadeUp();
+
   return (
+    <Animated.View style={[{ flex: 1 }, { opacity, transform: [{ translateY }] }]}>
     <ScrollView
       style={s.container}
       contentContainerStyle={s.scrollContent}
@@ -199,6 +204,7 @@ function VaultContent() {
         </View>
       )}
     </ScrollView>
+    </Animated.View>
   );
 }
 
