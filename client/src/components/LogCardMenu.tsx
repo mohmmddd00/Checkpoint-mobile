@@ -60,6 +60,12 @@ function EditLogModal({
   const [review, setReview] = useState(log.review || "");
   const [submitting, setSubmitting] = useState(false);
 
+  const hasChanges =
+    platform !== (log.platform || "") ||
+    status !== (log.status || "") ||
+    rating !== (log.rating != null ? String(log.rating) : "") ||
+    review !== (log.review || "");
+
   const handleSave = async () => {
     if (!platform.trim()) { cpToast.error("Please select a platform."); return; }
     if (!status) { cpToast.error("Please select a status."); return; }
@@ -203,9 +209,9 @@ function EditLogModal({
 
             {/* Save */}
             <TouchableOpacity
-              style={[m.saveBtn, submitting && m.saveBtnDisabled]}
+              style={[m.saveBtn, (!hasChanges || submitting) && m.saveBtnDisabled]}
               onPress={handleSave}
-              disabled={submitting}
+              disabled={!hasChanges || submitting}
             >
               {submitting
                 ? <ActivityIndicator color="#fff" size="small" />
