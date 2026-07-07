@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View, Text, TouchableOpacity, Modal,
-  StyleSheet, Pressable,
+  StyleSheet, Pressable, useWindowDimensions,
 } from "react-native";
 
 interface DeleteConfirmMenuProps {
@@ -18,6 +18,20 @@ export function DeleteConfirmMenu({
   const [menuOpen, setMenuOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, right: 0 });
+  const triggerRef = useRef<View>(null);
+  const { width: screenWidth } = useWindowDimensions();
+
+  const openMenu = () => {
+    triggerRef.current?.measure((_fx, _fy, width, height, px, py) => {
+      // anchor dropdown: top = just below button, right = distance from screen right edge
+      setDropdownPos({
+        top: py + height + 6,
+        right: screenWidth - px - width,
+      });
+      setMenuOpen(true);
+    });
+  };
 
   const handleDeleteClick = () => {
     setMenuOpen(false);
@@ -38,22 +52,28 @@ export function DeleteConfirmMenu({
     <View>
       {/* ── ELLIPSIS TRIGGER ── */}
       <TouchableOpacity
-        onPress={() => setMenuOpen((o) => !o)}
+        ref={triggerRef}
+        onPress={openMenu}
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         style={s.trigger}
       >
         <Text style={s.triggerText}>•••</Text>
       </TouchableOpacity>
 
-      {/* ── DROPDOWN MENU ── */}
-      {menuOpen && (
-        <>
-          {/* Invisible backdrop to close menu on outside tap */}
+      {/* ── DROPDOWN — rendered in Modal, positioned by measured coords ── */}
+      <Modal
+        visible={menuOpen}
+        transparent
+        animationType="none"
+        onRequestClose={() => setMenuOpen(false)}
+      >
+        {/* full-screen backdrop — tap anywhere outside to close */}
+        <Pressable style={StyleSheet.absoluteFillObject} onPress={() => setMenuOpen(false)}>
+          {/* stop tap on the dropdown itself from closing the backdrop */}
           <Pressable
-            style={StyleSheet.absoluteFillObject}
-            onPress={() => setMenuOpen(false)}
-          />
-          <View style={s.dropdown}>
+            style={[s.dropdown, { top: dropdownPos.top, right: dropdownPos.right }]}
+            onPress={() => {}}
+          >
             {onEdit && (
               <TouchableOpacity
                 style={[s.dropdownItem, s.dropdownItemBorder]}
@@ -68,15 +88,15 @@ export function DeleteConfirmMenu({
             >
               <Text style={s.dropdownItemTextDelete}>Delete</Text>
             </TouchableOpacity>
-          </View>
-        </>
-      )}
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       {/* ── CONFIRMATION DIALOG ── */}
       <Modal
         visible={dialogOpen}
         transparent
-        animationType="fade"
+        animationType="none"
         onRequestClose={() => { if (!deleting) setDialogOpen(false); }}
       >
         <Pressable
@@ -124,15 +144,12 @@ const s = StyleSheet.create({
   },
   dropdown: {
     position: "absolute",
-    top: 28,
-    right: 0,
     backgroundColor: "#1a0508",
     borderWidth: 1,
     borderColor: "#380B14",
     borderRadius: 8,
-    minWidth: 110,
+    minWidth: 120,
     overflow: "hidden",
-    zIndex: 50,
     shadowColor: "#000",
     shadowOpacity: 0.6,
     shadowRadius: 12,
