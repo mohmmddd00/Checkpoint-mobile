@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   View, Text, ScrollView, Image, TouchableOpacity,
   StyleSheet, ActivityIndicator,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../App";
 import { DashboardLayout } from "../components/DashboardLayout";
@@ -295,54 +295,59 @@ function ProfileContent() {
   const [vaultCount, setVaultCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const load = async () => {
-      const token = await storage.getToken();
-      const headers = { Authorization: `Bearer ${token}` };
-      try {
-        const [profileRes, logsRes, vaultsRes] = await Promise.all([
-          fetch(`${API_URL}/auth/me`, { headers }),
-          fetch(`${API_URL}/gamelogs`, { headers }),
-          fetch(`${API_URL}/vaults`, { headers }),
-        ]);
+  const load = useCallback(async () => {
+    const token = await storage.getToken();
+    const headers = { Authorization: `Bearer ${token}` };
+    try {
+      const [profileRes, logsRes, vaultsRes] = await Promise.all([
+        fetch(`${API_URL}/auth/me`, { headers }),
+        fetch(`${API_URL}/gamelogs`, { headers }),
+        fetch(`${API_URL}/vaults`, { headers }),
+      ]);
 
-        if (profileRes.ok) setProfile(await profileRes.json());
+      if (profileRes.ok) setProfile(await profileRes.json());
 
-        if (vaultsRes.ok) {
-          const allVaults: Vault[] = await vaultsRes.json();
-          setVaultCount(allVaults.length);
-          setVaults(allVaults.slice(0, 4));
-        }
-
-        if (logsRes.ok) {
-          const logsData: GameLog[] = await logsRes.json();
-          setLogs(logsData);
-
-          const recent = [...logsData]
-            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-            .slice(0, 5)
-            .map((log: any) => ({ ...log, coverImage: log.coverImage || null }));
-          setRecentLogs(recent);
-
-          const reviewed = [...logsData]
-            .filter((l) => l.review && l.review.trim().length > 0)
-            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-            .slice(0, 3)
-            .map((log: any) => ({
-              ...log,
-              coverImage: log.coverImage || null,
-              releasedDate: log.releasedDate || null,
-            }));
-          setReviewLogs(reviewed);
-        }
-      } catch (err) {
-        console.error("Failed to load profile:", err);
-      } finally {
-        setLoading(false);
+      if (vaultsRes.ok) {
+        const allVaults: Vault[] = await vaultsRes.json();
+        setVaultCount(allVaults.length);
+        setVaults(allVaults.slice(0, 4));
       }
-    };
-    load();
+
+      if (logsRes.ok) {
+        const logsData: GameLog[] = await logsRes.json();
+        setLogs(logsData);
+
+        const recent = [...logsData]
+          .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+          .slice(0, 5)
+          .map((log: any) => ({ ...log, coverImage: log.coverImage || null }));
+        setRecentLogs(recent);
+
+        const reviewed = [...logsData]
+          .filter((l) => l.review && l.review.trim().length > 0)
+          .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+          .slice(0, 3)
+          .map((log: any) => ({
+            ...log,
+            coverImage: log.coverImage || null,
+            releasedDate: log.releasedDate || null,
+          }));
+        setReviewLogs(reviewed);
+      }
+    } catch (err) {
+      console.error("Failed to load profile:", err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => { load(); }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load])
+  );
 
   const avgRating = logs.length > 0
     ? (logs.reduce((sum, l) => sum + (l.rating || 0), 0) / logs.length).toFixed(1)

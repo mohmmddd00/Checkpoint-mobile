@@ -16,6 +16,7 @@ import { VaultCreationScreen } from "./src/screens/VaultCreationScreen";
 import { LogsScreen } from "./src/screens/LogsScreen";
 import { AllUserReviewsScreen } from "./src/screens/AllUserReviewsScreen";
 import { ReviewScreen } from "./src/screens/ReviewScreen";
+import { EditReviewScreen } from "./src/screens/EditReviewScreen";
 
 export type RootStackParamList = {
   Login: undefined;
@@ -33,6 +34,7 @@ export type RootStackParamList = {
   QuickLog: undefined;
   Game: { slug: string; game: any };
   Review: { id: string; log?: any };
+  EditReview: { id: string; log?: any };
   PublicVault: { id: string };
   Stats: undefined;
   VaultCreation: undefined;
@@ -69,6 +71,7 @@ export default function App() {
         <Stack.Screen name="Logs" component={LogsScreen} />
         <Stack.Screen name="Reviews" component={AllUserReviewsScreen} />
         <Stack.Screen name="Review" component={ReviewScreen} />
+        <Stack.Screen name="EditReview" component={EditReviewScreen} />
       </Stack.Navigator>
     </NavigationContainer>
     <Toast />

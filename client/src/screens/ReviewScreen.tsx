@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { DashboardLayout } from "../components/DashboardLayout";
-import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import { useNavigation, useRoute, RouteProp, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { RootStackParamList } from "../../App";
@@ -51,6 +51,25 @@ export function ReviewScreen() {
   const { opacity, translateY } = useFadeUp();
   const scrollRef = useRef<any>(null);
 
+  const fetchLog = useCallback(async (t: string | null) => {
+    try {
+      const res = await fetch(`${API_URL}/gamelogs/${id}`, {
+        headers: { Authorization: `Bearer ${t}` },
+      });
+      if (!res.ok) return;
+      const baseLog = await res.json();
+      setLog({
+        ...baseLog,
+        coverImage: baseLog.coverImage || null,
+        releasedDate: baseLog.releasedDate || null,
+      });
+    } catch (err) {
+      console.error("Failed to load review:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
   useEffect(() => {
     const init = async () => {
       const t = await AsyncStorage.getItem("token");
@@ -60,26 +79,18 @@ export function ReviewScreen() {
           setCurrentUserId(JSON.parse(atob(t.split(".")[1])).id ?? null);
         } catch {}
       }
-
-      try {
-        const res = await fetch(`${API_URL}/gamelogs/${id}`, {
-          headers: { Authorization: `Bearer ${t}` },
-        });
-        if (!res.ok) return;
-        const baseLog = await res.json();
-        setLog({
-          ...baseLog,
-          coverImage: baseLog.coverImage || null,
-          releasedDate: baseLog.releasedDate || null,
-        });
-      } catch (err) {
-        console.error("Failed to load review:", err);
-      } finally {
-        setLoading(false);
-      }
+      await fetchLog(t);
     };
     init();
   }, [id]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (token !== null) {
+        fetchLog(token);
+      }
+    }, [token, fetchLog])
+  );
 
   const handleDeleteReview = async () => {
     if (!log || !token) return;
@@ -144,7 +155,7 @@ export function ReviewScreen() {
             {isOwnReview && (
               <DeleteConfirmMenu
                 onEdit={() =>
-                  navigation.navigate("Review", { id: log._id })
+                  navigation.navigate("EditReview", { id: log._id, log })
                 }
                 onDelete={handleDeleteReview}
                 // cancelMessage="Review not deleted."
