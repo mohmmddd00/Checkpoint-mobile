@@ -9,6 +9,7 @@ import { ProfileScreen } from "./src/screens/ProfileScreen";
 import { SavedVaultsScreen } from "./src/screens/SavedVaultsScreen";
 import { PublicVaultScreen } from "./src/screens/PublicVaultScreen";
 import { StatsScreen } from "./src/screens/StatsScreen";
+import { VaultScreen } from "./src/screens/VaultScreen";
 
 export type RootStackParamList = {
   Login: undefined;
@@ -30,6 +31,8 @@ export type RootStackParamList = {
   Stats: undefined;
   VaultCreation: undefined;
   MyVaults: undefined;
+  Vault: { id: string; vault?: any };
+  EditVault: { id: string };
   Reviews: undefined;
   SavedVaults: undefined;
   CommunityVaults: undefined;
@@ -53,6 +56,7 @@ export default function App() {
         <Stack.Screen name="SavedVaults" component={SavedVaultsScreen} />
         <Stack.Screen name="PublicVault" component={PublicVaultScreen} />
         <Stack.Screen name="Stats" component={StatsScreen} />
+        <Stack.Screen name="Vault" component={VaultScreen} />
       </Stack.Navigator>
     </NavigationContainer>
     <Toast />

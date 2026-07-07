@@ -237,8 +237,8 @@ function VaultProfileCard({ vault }: { vault: Vault }) {
   return (
     <TouchableOpacity
       style={s.vaultCard}
-      onPress={() => navigation.navigate("PublicVault", { id: vault._id })}
-      activeOpacity={0.8}
+      onPressIn={() => navigation.navigate("Vault", { id: vault._id, vault })}
+      activeOpacity={0.85}
     >
       {/* 2x2 collage */}
       <View style={s.vaultCollage}>
