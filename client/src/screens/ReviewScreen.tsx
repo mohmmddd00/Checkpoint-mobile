@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
-  ScrollView,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { DashboardLayout } from "../components/DashboardLayout";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -49,6 +49,7 @@ export function ReviewScreen() {
   const [token, setToken] = useState<string | null>(null);
 
   const { opacity, translateY } = useFadeUp();
+  const scrollRef = useRef<any>(null);
 
   useEffect(() => {
     const init = async () => {
@@ -127,7 +128,13 @@ export function ReviewScreen() {
   return (
     <DashboardLayout>
       <Animated.View style={[{ flex: 1 }, { opacity, transform: [{ translateY }] }]}>
-        <ScrollView contentContainerStyle={s.scrollContent}>
+        <KeyboardAwareScrollView
+          ref={scrollRef}
+          contentContainerStyle={s.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          enableOnAndroid
+          extraScrollHeight={67}
+        >
           {/* Back + delete row */}
           <View style={s.topRow}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -161,7 +168,7 @@ export function ReviewScreen() {
 
           {/* Engagement */}
           <ReviewEngagement gameLogId={log._id} />
-        </ScrollView>
+        </KeyboardAwareScrollView>
       </Animated.View>
     </DashboardLayout>
   );

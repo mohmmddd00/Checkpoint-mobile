@@ -7,6 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   ActivityIndicator,
+  Keyboard,
 } from "react-native";
 import { Svg, Path, Polyline } from "react-native-svg";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -446,6 +447,7 @@ export function ReviewEngagement({ gameLogId }: ReviewEngagementProps) {
 
     setComments((c) => [optimisticComment, ...c]);
     setNewComment("");
+    Keyboard.dismiss();
     setPosting(true);
 
     try {
