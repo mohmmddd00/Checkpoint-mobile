@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import {
   View, Text, TouchableOpacity, StyleSheet, Animated,
-  Pressable, Image, TextInput, FlatList, Modal, StatusBar, Platform,
+  Pressable, Image, TextInput, FlatList, StatusBar, Platform,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -10,6 +10,7 @@ import { SearchContext } from "../context/SearchContext";
 import { storage } from "../utils/storage";
 import { routes } from "../navigation/routes";
 import type { RootStackParamList } from "../../App";
+import { GameSearchResults } from "./GameSearchResults";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 const STATIC_BASE_URL = API_URL!.replace(/\/api\/?$/, "");
@@ -94,11 +95,17 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     navigation.navigate("Game", { slug, game });
   };
 
+  const handleCloseSearch = () => {
+    setSearchOpen(false);
+    setSearchQuery("");
+  };
+
   return (
     <SearchContext.Provider value={searchQuery}>
       <View style={styles.container}>
 
         {/* ── TOP HEADER ── */}
+        <View>
         <View style={styles.header}>
           {/* Hamburger */}
           <View style={styles.headerLeft}>
@@ -119,8 +126,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <View style={styles.headerRightWrapper}>
             <View style={styles.headerRight}>
             {/* Search */}
-            <TouchableOpacity onPress={() => setSearchOpen(true)} style={[styles.headerBtn, { marginRight: 4 }]}>
-              <Text style={styles.headerIcon}>🔍</Text>
+            <TouchableOpacity
+              onPress={() => setSearchOpen((v) => !v)}
+              style={[styles.headerBtn, { marginRight: 4 }]}
+            >
+              <Text style={[styles.headerIcon, searchOpen && { color: "#E6A1B0" }]}>🔍</Text>
             </TouchableOpacity>
 
             {/* Avatar */}
@@ -140,27 +150,33 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </View>
         </View>
 
-        {/* ── SEARCH MODAL ── */}
-        <Modal visible={searchOpen} animationType="fade" transparent>
-          <View style={styles.searchModal}>
+        {/* ── INLINE SEARCH BAR + RESULTS ── */}
+        {searchOpen && (
+          <View style={styles.searchDropdownWrap}>
             <View style={styles.searchBar}>
               <Text style={styles.searchIcon}>🔍</Text>
               <TextInput
                 autoFocus
-                placeholder="The Last Of Us..."
+                placeholder="Search for a game..."
                 placeholderTextColor="rgba(255,255,255,0.3)"
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 style={styles.searchInput}
                 returnKeyType="search"
-                onSubmitEditing={() => setSearchOpen(false)}
               />
-              <TouchableOpacity onPress={() => { setSearchOpen(false); setSearchQuery(""); }}>
+              <TouchableOpacity onPress={handleCloseSearch}>
                 <Text style={styles.searchClose}>✕</Text>
               </TouchableOpacity>
             </View>
+            {currentRoute !== "Home" && searchQuery.trim().length >= 2 && (
+              <GameSearchResults
+                query={searchQuery}
+                onSelect={(game) => handleSelectGame(game)}
+              />
+            )}
           </View>
-        </Modal>
+        )}
+        </View>
 
         {/* ── SIDEBAR OVERLAY ── */}
         {isPanelOpen && (
@@ -446,21 +462,24 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "800",
   },
-  searchModal: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.85)",
-    paddingTop: Platform.OS === "ios" ? 110 : (StatusBar.currentHeight ?? 24) + 70,
-    paddingHorizontal: 16,
+  searchDropdownWrap: {
+    backgroundColor: "#0D0204",
+    borderBottomWidth: 1,
+    borderBottomColor: "#28070F",
+    paddingHorizontal: 12,
+    paddingBottom: 8,
+    paddingTop: 4,
   },
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.1)",
-    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.06)",
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.15)",
+    borderColor: "rgba(255,255,255,0.12)",
     paddingHorizontal: 14,
     gap: 10,
+    marginBottom: 6,
   },
   searchIcon: {
     fontSize: 14,
