@@ -21,6 +21,7 @@ import { EditReviewScreen } from "./src/screens/EditReviewScreen";
 import { VerifyAccountScreen } from "./src/screens/VerifyAccountScreen";
 import { CompleteProfileScreen } from "./src/screens/CompleteProfileScreen";
 import { AboutScreen } from "./src/screens/AboutScreen";
+import { CommunityReviewsScreen } from "./src/screens/CommunityReviewsScreen";
 
 export type RootStackParamList = {
   Login: undefined;
@@ -80,6 +81,7 @@ export default function App() {
         <Stack.Screen name="CompleteProfile" component={CompleteProfileScreen} />
         <Stack.Screen name="VerifyAccount" component={VerifyAccountScreen} />
         <Stack.Screen name="About" component={AboutScreen} />
+        <Stack.Screen name="CommunityReviews" component={CommunityReviewsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
     <Toast config={toastConfig} topOffset={60} />
