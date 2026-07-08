@@ -18,6 +18,7 @@ import { LogsScreen } from "./src/screens/LogsScreen";
 import { AllUserReviewsScreen } from "./src/screens/AllUserReviewsScreen";
 import { ReviewScreen } from "./src/screens/ReviewScreen";
 import { EditReviewScreen } from "./src/screens/EditReviewScreen";
+import { VerifyAccountScreen } from "./src/screens/VerifyAccountScreen";
 import { CompleteProfileScreen } from "./src/screens/CompleteProfileScreen";
 
 export type RootStackParamList = {
@@ -76,6 +77,7 @@ export default function App() {
         <Stack.Screen name="Review" component={ReviewScreen} />
         <Stack.Screen name="EditReview" component={EditReviewScreen} />
         <Stack.Screen name="CompleteProfile" component={CompleteProfileScreen} />
+        <Stack.Screen name="VerifyAccount" component={VerifyAccountScreen} />
       </Stack.Navigator>
     </NavigationContainer>
     <Toast config={toastConfig} topOffset={60} />
