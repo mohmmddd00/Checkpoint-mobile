@@ -27,6 +27,7 @@ import { SettingsScreen } from "./src/screens/SettingsScreen";
 import { SettingsProfileScreen } from "./src/screens/SettingsProfileScreen";
 import { SettingsDeleteAccountScreen } from "./src/screens/SettingsDeleteAccountScreen";
 import { UpcomingGamesScreen } from "./src/screens/UpcomingGamesScreen";
+import { QuickLogScreen } from "./src/screens/QuickLogScreen";
 
 export type RootStackParamList = {
   Login: undefined;
@@ -94,6 +95,7 @@ export default function App() {
         <Stack.Screen name="SettingsProfile" component={SettingsProfileScreen} />
         <Stack.Screen name="SettingsDeleteAccount" component={SettingsDeleteAccountScreen} />
         <Stack.Screen name="UpcomingGames" component={UpcomingGamesScreen} />
+        <Stack.Screen name="QuickLog" component={QuickLogScreen} />
       </Stack.Navigator>
     </NavigationContainer>
     <Toast config={toastConfig} topOffset={60} />
