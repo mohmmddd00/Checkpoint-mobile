@@ -37,12 +37,13 @@ function extractPlatforms(game: Game): string[] {
 
 // ─── STEP 1: GAME SEARCH ─────────────────────────────────────────────────────
 
-function QuickLogSearch({ onSelect }: { onSelect: (game: Game) => void }) {
+function QuickLogSearch({ onSelect, autoFocus = true }: { onSelect: (game: Game) => void; autoFocus?: boolean }) {
   const [query, setQuery] = useState("");
   const [resultsVisible, setResultsVisible] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
   useEffect(() => {
+    if (!autoFocus) return;
     const timer = setTimeout(() => inputRef.current?.focus(), 300);
     return () => clearTimeout(timer);
   }, []);
@@ -349,18 +350,21 @@ function LogModal({
 export function QuickLogScreen() {
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [searchKey, setSearchKey] = useState(0);
+  const [shouldAutoFocus, setShouldAutoFocus] = useState(true);
 
   // Reset search every time the screen comes into focus (e.g. user navigated away and back)
   useFocusEffect(
     useCallback(() => {
       setSelectedGame(null);
       setSearchKey((k) => k + 1);
+      setShouldAutoFocus(true);
     }, [])
   );
 
   const handleLogClose = () => {
     setSelectedGame(null);
     setSearchKey((k) => k + 1); // remounts QuickLogSearch → clears search input
+    setShouldAutoFocus(false); // don't pop keyboard after logging
   };
 
   const handleBack = () => {
@@ -369,7 +373,7 @@ export function QuickLogScreen() {
 
   return (
     <DashboardLayout>
-      <QuickLogSearch key={searchKey} onSelect={setSelectedGame} />
+      <QuickLogSearch key={searchKey} onSelect={setSelectedGame} autoFocus={shouldAutoFocus} />
       {selectedGame && (
         <LogModal
           game={selectedGame}
