@@ -9,11 +9,12 @@ import {
   Image,
   Alert,
 } from "react-native";
+import Svg, { Path, Circle as SvgCircle } from "react-native-svg";
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Toast from "react-native-toast-message";
+import { cpToast } from "../utils/toast";
 import { DashboardLayout } from "../components/DashboardLayout";
 import { ActionButton } from "../components/SettingsActionButton";
 import { RootStackParamList } from "../../App";
@@ -30,6 +31,15 @@ function resolveAvatarUrl(path: string | null | undefined): string | null {
 }
 
 // ─── Avatar ───────────────────────────────────────────────────────────────────
+
+function CameraIcon() {
+  return (
+    <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <Path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+      <SvgCircle cx={12} cy={13} r={4} />
+    </Svg>
+  );
+}
 
 function AvatarUpload({
   preview,
@@ -49,7 +59,7 @@ function AvatarUpload({
         onPress: async () => {
           const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
           if (status !== "granted") {
-            Toast.show({ type: "error", text1: "Permission needed to access photos." });
+            cpToast.error("Permission needed to access photos.");
             return;
           }
           const result = await ImagePicker.launchImageLibraryAsync({
@@ -74,15 +84,17 @@ function AvatarUpload({
 
   return (
     <View style={avStyles.wrapper}>
-      <TouchableOpacity onPress={handlePress} activeOpacity={0.85} style={avStyles.circle}>
-        {preview ? (
-          <Image source={{ uri: preview }} style={avStyles.image} />
-        ) : (
-          <Text style={avStyles.initials}>{initials}</Text>
-        )}
-        {/* Camera badge */}
+      <TouchableOpacity onPress={handlePress} activeOpacity={0.85}>
+        <View style={avStyles.circle}>
+          {preview ? (
+            <Image source={{ uri: preview }} style={avStyles.image} />
+          ) : (
+            <Text style={avStyles.initials}>{initials}</Text>
+          )}
+        </View>
+        {/* Camera badge — positioned relative to the TouchableOpacity, outside the circle */}
         <View style={avStyles.badge}>
-          <Text style={avStyles.badgeIcon}>📷</Text>
+          <CameraIcon />
         </View>
       </TouchableOpacity>
     </View>
@@ -106,8 +118,8 @@ const avStyles = StyleSheet.create({
   initials: { fontSize: 32, fontWeight: "800", color: "#F7F4F5", letterSpacing: 1 },
   badge: {
     position: "absolute",
-    bottom: 0,
-    right: 0,
+    bottom: 2,
+    right: 2,
     width: 28,
     height: 28,
     borderRadius: 14,
@@ -117,7 +129,6 @@ const avStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  badgeIcon: { fontSize: 12 },
 });
 
 // ─── Field ────────────────────────────────────────────────────────────────────
@@ -263,26 +274,26 @@ function UserProfilePanel() {
   };
 
   const handleConfirm = async () => {
-    if (!firstName.trim()) { Toast.show({ type: "error", text1: "First name cannot be empty." }); return; }
-    if (!lastName.trim()) { Toast.show({ type: "error", text1: "Last name cannot be empty." }); return; }
-    if (firstName.trim().length < 2) { Toast.show({ type: "error", text1: "First name must be at least 2 characters." }); return; }
-    if (/^-|-$/.test(firstName.trim())) { Toast.show({ type: "error", text1: "First name cannot start or end with a hyphen." }); return; }
-    if (!/^[A-Za-z]([A-Za-z\s\-]*[A-Za-z])?$/.test(firstName.trim())) { Toast.show({ type: "error", text1: "First name can only contain letters, spaces, or hyphens." }); return; }
-    if (middleName.trim() && middleName.trim().length < 2) { Toast.show({ type: "error", text1: "Middle name must be at least 2 characters." }); return; }
-    if (middleName.trim() && /^-|-$/.test(middleName.trim())) { Toast.show({ type: "error", text1: "Middle name cannot start or end with a hyphen." }); return; }
-    if (middleName.trim() && !/^[A-Za-z]([A-Za-z\s\-]*[A-Za-z])?$/.test(middleName.trim())) { Toast.show({ type: "error", text1: "Middle name can only contain letters, spaces, or hyphens." }); return; }
-    if (lastName.trim().length < 2) { Toast.show({ type: "error", text1: "Last name must be at least 2 characters." }); return; }
-    if (/^-|-$/.test(lastName.trim())) { Toast.show({ type: "error", text1: "Last name cannot start or end with a hyphen." }); return; }
-    if (!/^[A-Za-z]([A-Za-z\s\-]*[A-Za-z])?$/.test(lastName.trim())) { Toast.show({ type: "error", text1: "Last name can only contain letters, spaces, or hyphens." }); return; }
-    if (!username.trim()) { Toast.show({ type: "error", text1: "Username cannot be empty." }); return; }
-    if (username.trim().length < 3) { Toast.show({ type: "error", text1: "Username must be at least 3 characters." }); return; }
-    if (username.trim().length > 30) { Toast.show({ type: "error", text1: "Username cannot exceed 30 characters." }); return; }
-    if (!/^[A-Za-z0-9]/.test(username.trim())) { Toast.show({ type: "error", text1: "Username cannot start with a special character." }); return; }
-    if (!/^[A-Za-z0-9_.]+$/.test(username.trim())) { Toast.show({ type: "error", text1: "Username can only contain letters, numbers, periods, and underscores." }); return; }
-    if (newPassword && !oldPassword) { Toast.show({ type: "error", text1: "Enter your current password to set a new one." }); return; }
-    if (oldPassword && !newPassword) { Toast.show({ type: "error", text1: "Enter a new password." }); return; }
-    if (newPassword && newPassword === oldPassword) { Toast.show({ type: "error", text1: "New password cannot be the same as the old one." }); return; }
-    if (newPassword && newPassword.length < 6) { Toast.show({ type: "error", text1: "New password must be at least 6 characters." }); return; }
+    if (!firstName.trim()) { cpToast.error("First name cannot be empty."); return; }
+    if (!lastName.trim()) { cpToast.error("Last name cannot be empty."); return; }
+    if (firstName.trim().length < 2) { cpToast.error("First name must be at least 2 characters."); return; }
+    if (/^-|-$/.test(firstName.trim())) { cpToast.error("First name cannot start or end with a hyphen."); return; }
+    if (!/^[A-Za-z]([A-Za-z\s\-]*[A-Za-z])?$/.test(firstName.trim())) { cpToast.error("First name can only contain letters, spaces, or hyphens."); return; }
+    if (middleName.trim() && middleName.trim().length < 2) { cpToast.error("Middle name must be at least 2 characters."); return; }
+    if (middleName.trim() && /^-|-$/.test(middleName.trim())) { cpToast.error("Middle name cannot start or end with a hyphen."); return; }
+    if (middleName.trim() && !/^[A-Za-z]([A-Za-z\s\-]*[A-Za-z])?$/.test(middleName.trim())) { cpToast.error("Middle name can only contain letters, spaces, or hyphens."); return; }
+    if (lastName.trim().length < 2) { cpToast.error("Last name must be at least 2 characters."); return; }
+    if (/^-|-$/.test(lastName.trim())) { cpToast.error("Last name cannot start or end with a hyphen."); return; }
+    if (!/^[A-Za-z]([A-Za-z\s\-]*[A-Za-z])?$/.test(lastName.trim())) { cpToast.error("Last name can only contain letters, spaces, or hyphens."); return; }
+    if (!username.trim()) { cpToast.error("Username cannot be empty."); return; }
+    if (username.trim().length < 3) { cpToast.error("Username must be at least 3 characters."); return; }
+    if (username.trim().length > 30) { cpToast.error("Username cannot exceed 30 characters."); return; }
+    if (!/^[A-Za-z0-9]/.test(username.trim())) { cpToast.error("Username cannot start with a special character."); return; }
+    if (!/^[A-Za-z0-9_.]+$/.test(username.trim())) { cpToast.error("Username can only contain letters, numbers, periods, and underscores."); return; }
+    if (newPassword && !oldPassword) { cpToast.error("Enter your current password to set a new one."); return; }
+    if (oldPassword && !newPassword) { cpToast.error("Enter a new password."); return; }
+    if (newPassword && newPassword === oldPassword) { cpToast.error("New password cannot be the same as the old one."); return; }
+    if (newPassword && newPassword.length < 6) { cpToast.error("New password must be at least 6 characters."); return; }
 
     setSaving(true);
     const token = await AsyncStorage.getItem("token");
@@ -304,7 +315,7 @@ function UserProfilePanel() {
 
         if (!avatarRes.ok) {
           const data = await avatarRes.json().catch(() => ({}));
-          Toast.show({ type: "error", text1: data.message || "Failed to upload profile picture." });
+          cpToast.error(data.message || "Failed to upload profile picture.");
           setSaving(false);
           return;
         }
@@ -320,7 +331,7 @@ function UserProfilePanel() {
 
         if (!removeRes.ok) {
           const data = await removeRes.json().catch(() => ({}));
-          Toast.show({ type: "error", text1: data.message || "Failed to remove profile picture." });
+          cpToast.error(data.message || "Failed to remove profile picture.");
           setSaving(false);
           return;
         }
@@ -355,7 +366,7 @@ function UserProfilePanel() {
         if (resData.token) {
           await AsyncStorage.setItem("token", resData.token);
         }
-        Toast.show({ type: "success", text1: "Profile updated." });
+        cpToast.success("Profile updated.");
         setOldPassword("");
         setNewPassword("");
         setOriginalFirstName(firstName.trim());
@@ -364,10 +375,10 @@ function UserProfilePanel() {
         setOriginalUsername(username.trim().toLowerCase());
       } else {
         const data = await res.json();
-        Toast.show({ type: "error", text1: data.message || "Failed to update profile." });
+        cpToast.error(data.message || "Failed to update profile.");
       }
     } catch {
-      Toast.show({ type: "error", text1: "Could not reach the server." });
+      cpToast.error("Could not reach the server.");
     } finally {
       setSaving(false);
     }
@@ -383,7 +394,7 @@ function UserProfilePanel() {
     setAvatarPreview(originalAvatarUrl);
     setAvatarUri(null);
     setAvatarRemoved(false);
-    Toast.show({ type: "success", text1: "Changes discarded." });
+    cpToast.success("Changes discarded.");
   };
 
   const isDirty =
