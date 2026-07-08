@@ -87,6 +87,7 @@ const styles = StyleSheet.create({
   cardMobile: {
     flexDirection: "column",
     height: "auto" as any,
+    alignItems: "flex-start",
   },
   rankSlot: {
     width: 28,
@@ -108,7 +109,9 @@ const styles = StyleSheet.create({
     padding: 14,
     paddingHorizontal: 16,
     gap: 10,
-    justifyContent: "center",
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
+    width: "100%",
   },
   metaRow: {
     flexDirection: "row",

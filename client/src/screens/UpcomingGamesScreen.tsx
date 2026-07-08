@@ -357,6 +357,7 @@ const styles = StyleSheet.create({
   cardMobile: {
     flexDirection: "column",
     height: "auto" as any,
+    alignItems: "flex-start",
   },
   rank: {
     fontSize: 11,
@@ -408,15 +409,18 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 14,
     paddingHorizontal: 16,
-    justifyContent: "center",
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
     gap: 6,
     minWidth: 0,
+    width: "100%",
   },
   titleRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
     flexWrap: "wrap",
+    alignSelf: "flex-start",
   },
   gameName: {
     color: "#F7F4F5",
