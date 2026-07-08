@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  ScrollView,
   TextInput,
   TouchableOpacity,
   Image,
   StyleSheet,
   Animated,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../App";
@@ -123,11 +123,13 @@ function VaultCreationContent() {
 
   return (
     <Animated.View style={[{ flex: 1 }, { opacity, transform: [{ translateY }] }]}>
-      <ScrollView
+      <KeyboardAwareScrollView
         style={s.container}
         contentContainerStyle={s.scrollContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        enableOnAndroid
+        extraScrollHeight={-100}
       >
         {/* ── BACK ── */}
         <TouchableOpacity onPress={() => navigation.navigate("Profile")} style={s.backBtn}>
@@ -231,7 +233,7 @@ function VaultCreationContent() {
           <Text style={s.discardBtnText}>Discard</Text>
         </TouchableOpacity>
 
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </Animated.View>
   );
 }
