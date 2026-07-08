@@ -3,12 +3,12 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TextInput,
   TouchableOpacity,
   Image,
   Alert,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Svg, { Path, Circle as SvgCircle } from "react-native-svg";
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
@@ -510,11 +510,13 @@ export function SettingsProfileScreen() {
 
   return (
     <DashboardLayout>
-      <ScrollView
+      <KeyboardAwareScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        enableOnAndroid
+        extraScrollHeight={-100}
       >
         <TouchableOpacity
           onPress={() => navigation.goBack()}
@@ -529,7 +531,7 @@ export function SettingsProfileScreen() {
         <UserProfilePanel />
 
         <View style={{ height: 60 }} />
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </DashboardLayout>
   );
 }
