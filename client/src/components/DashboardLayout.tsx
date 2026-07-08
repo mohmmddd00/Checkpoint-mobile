@@ -3,7 +3,7 @@ import {
   View, Text, TouchableOpacity, StyleSheet, Animated,
   Pressable, Image, TextInput, FlatList, StatusBar, Platform,
 } from "react-native";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute, useNavigationState } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { ReactNode } from "react";
 import { SearchContext } from "../context/SearchContext";
@@ -311,10 +311,18 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           />
           <View style={{ flex: 1, alignItems: "center" }}>
             <TouchableOpacity
-              style={styles.quickLogBtn}
-              onPress={() => navigation.navigate("QuickLog")}
+              style={[styles.quickLogBtn, currentRoute === "QuickLog" && styles.quickLogBtnActive]}
+              onPress={() => {
+                if (currentRoute === "QuickLog") {
+                  navigation.goBack();
+                } else {
+                  navigation.navigate("QuickLog");
+                }
+              }}
             >
-              <Text style={styles.quickLogIcon}>+</Text>
+              <Text style={[styles.quickLogIcon, currentRoute === "QuickLog" && styles.quickLogIconActive]}>
+                {currentRoute === "QuickLog" ? "✕" : "+"}
+              </Text>
             </TouchableOpacity>
           </View>
           <TabItem
@@ -709,10 +717,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  quickLogBtnActive: {
+    backgroundColor: "rgba(158,27,50,0.3)",
+    borderColor: "rgba(158,27,50,0.8)",
+  },
   quickLogIcon: {
     color: "#E6A1B0",
     fontSize: 24,
     fontWeight: "400",
     lineHeight: 28,
+  },
+  quickLogIconActive: {
+    fontSize: 18,
+    lineHeight: 22,
   },
 });

@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   View,
   Text,
@@ -343,6 +344,14 @@ function LogModal({
 export function QuickLogScreen() {
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [searchKey, setSearchKey] = useState(0);
+
+  // Reset search every time the screen comes into focus (e.g. user navigated away and back)
+  useFocusEffect(
+    useCallback(() => {
+      setSelectedGame(null);
+      setSearchKey((k) => k + 1);
+    }, [])
+  );
 
   const handleLogClose = () => {
     setSelectedGame(null);
