@@ -11,6 +11,7 @@ import { storage } from "../utils/storage";
 import { routes } from "../navigation/routes";
 import type { RootStackParamList } from "../../App";
 import { GameSearchResults } from "./GameSearchResults";
+import Svg, { Path } from "react-native-svg";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 const STATIC_BASE_URL = API_URL!.replace(/\/api\/?$/, "");
@@ -296,16 +297,36 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* ── BOTTOM TAB BAR ── */}
         <View style={styles.tabBar}>
-          <TabItem label="Home" icon="🏠" active={currentRoute === "Home"} onPress={() => navigation.navigate("Home")} />
-          <TabItem label="Logs" icon="📋" active={currentRoute === "Logs"} onPress={() => navigation.navigate("Logs")} />
+          <TabItem
+            label="Home"
+            iconPath="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"
+            active={currentRoute === "Home"}
+            onPress={() => navigation.navigate("Home")}
+          />
+          <TabItem
+            label="Logs"
+            iconPath="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"
+            active={currentRoute === "Logs"}
+            onPress={() => navigation.navigate("Logs")}
+          />
           <TouchableOpacity
             style={styles.quickLogBtn}
             onPress={() => navigation.navigate("QuickLog")}
           >
             <Text style={styles.quickLogIcon}>+</Text>
           </TouchableOpacity>
-          <TabItem label="Community" icon="🌐" active={currentRoute === "CommunityReviews"} onPress={() => navigation.navigate("CommunityReviews")} />
-          <TabItem label="Profile" icon="👤" active={currentRoute === "Profile"} onPress={() => navigation.navigate("Profile")} />
+          <TabItem
+            label="Community"
+            iconPath="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"
+            active={currentRoute === "CommunityReviews"}
+            onPress={() => navigation.navigate("CommunityReviews")}
+          />
+          <TabItem
+            label="Profile"
+            iconPath="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+            active={currentRoute === "Profile"}
+            onPress={() => navigation.navigate("Profile")}
+          />
         </View>
 
       </View>
@@ -360,15 +381,18 @@ function NavItem({ label, active, onPress, icon, danger = false }: {
 
 // ── TAB ITEM ─────────────────────────────────────────────────────────────────
 
-function TabItem({ label, icon, active, onPress }: {
+function TabItem({ label, iconPath, active, onPress }: {
   label: string;
-  icon: string;
+  iconPath: string;
   active: boolean;
   onPress: () => void;
 }) {
+  const iconColor = active ? "#E6A1B0" : "#5A4048";
   return (
     <TouchableOpacity style={styles.tabItem} onPress={onPress} activeOpacity={0.7}>
-      <Text style={[styles.tabIcon, active && styles.tabIconActive]}>{icon}</Text>
+      <Svg width={22} height={22} viewBox="0 0 24 24" fill={iconColor}>
+        <Path d={iconPath} />
+      </Svg>
       <Text style={[styles.tabLabel, active && styles.tabLabelActive]}>{label}</Text>
     </TouchableOpacity>
   );
