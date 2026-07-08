@@ -38,7 +38,7 @@ interface Vault {
 
 // ─── COVER COLLAGE ───────────────────────────────────────────────────────────
 
-function VaultCoverCollage({ games, size = 90 }: { games: VaultGame[]; size?: number }) {
+export function VaultCoverCollage({ games, size = 90 }: { games: VaultGame[]; size?: number }) {
   const slots = [games[0], games[1], games[2], games[3]];
   const height = Math.round(size * 1.5);
   const tileW = Math.floor(size / 2);
