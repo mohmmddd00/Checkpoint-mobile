@@ -4,14 +4,12 @@ import {
   Text,
   Image,
   TouchableOpacity,
-  ScrollView,
   StyleSheet,
   Animated,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../App";
-import { DashboardLayout } from "../components/DashboardLayout";
 import { FloppyDiskIcon } from "../components/FloppyDiskIcon";
 import { VaultCoverCollage } from "./MyVaultsScreen";
 import { useSavedVault } from "../hooks/useSavedVault";
@@ -53,62 +51,6 @@ interface CommunityVault {
   games: VaultGame[];
   createdAt: string;
   editedAt?: string | null;
-}
-
-// ─── COMMUNITY TOGGLE ─────────────────────────────────────────────────────────
-
-function CommunityToggle({
-  activeTab,
-  onToggle,
-}: {
-  activeTab: "reviews" | "vaults";
-  onToggle: (tab: "reviews" | "vaults") => void;
-}) {
-  const slideAnim = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    Animated.timing(slideAnim, {
-      toValue: activeTab === "vaults" ? 1 : 0,
-      duration: 250,
-      useNativeDriver: false,
-    }).start();
-  }, [activeTab]);
-
-  return (
-    <View style={s.toggleWrap}>
-      <View style={s.toggleTrack}>
-        <Animated.View
-          style={[
-            s.toggleCapsule,
-            {
-              left: slideAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: ["1%", "51%"],
-              }),
-            },
-          ]}
-        />
-        <TouchableOpacity
-          style={s.toggleBtn}
-          onPressIn={() => onToggle("reviews")}
-          activeOpacity={1}
-        >
-          <Text style={[s.toggleLabel, activeTab === "reviews" && s.toggleLabelActive]}>
-            Reviews
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={s.toggleBtn}
-          onPressIn={() => onToggle("vaults")}
-          activeOpacity={1}
-        >
-          <Text style={[s.toggleLabel, activeTab === "vaults" && s.toggleLabelActive]}>
-            Vaults
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
 }
 
 // ─── USER AVATAR ──────────────────────────────────────────────────────────────
@@ -222,12 +164,10 @@ function CommunityVaultCard({
 
       {/* ── VAULT BODY ── */}
       <View style={s.cardBody}>
-        {/* Cover collage */}
         <View style={{ alignSelf: "flex-start" }}>
           <VaultCoverCollage games={vault.games} size={90} />
         </View>
 
-        {/* Info */}
         <View style={s.vaultInfo}>
           <Text
             style={[s.vaultTitle, pressed && s.vaultTitlePressed]}
@@ -264,13 +204,11 @@ function CommunityVaultCard({
   );
 }
 
-// ─── SCREEN CONTENT ───────────────────────────────────────────────────────────
+// ─── FEED (exported) ──────────────────────────────────────────────────────────
 
-function CommunityVaultsContent() {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+export function CommunityVaultsFeed() {
   const [vaults, setVaults] = useState<CommunityVault[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab] = useState<"reviews" | "vaults">("vaults");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const translateAnim = useRef(new Animated.Value(16)).current;
@@ -304,7 +242,6 @@ function CommunityVaultsContent() {
     load();
   }, []);
 
-  // Fade-up animation when content loads
   useEffect(() => {
     if (!loading) {
       Animated.parallel([
@@ -322,136 +259,38 @@ function CommunityVaultsContent() {
     }
   }, [loading]);
 
-  const handleToggle = (tab: "reviews" | "vaults") => {
-    if (tab === "reviews") {
-      navigation.navigate("CommunityReviews");
-    }
-  };
+  if (loading) return <CommunityVaultsPageSkeleton />;
+
+  if (vaults.length === 0) {
+    return (
+      <View style={s.emptyState}>
+        <Text style={s.emptyText}>No community vaults yet.</Text>
+      </View>
+    );
+  }
 
   return (
-    <ScrollView
-      style={s.scrollView}
-      contentContainerStyle={s.scrollContent}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
+    <Animated.View
+      style={{
+        opacity: fadeAnim,
+        transform: [{ translateY: translateAnim }],
+        gap: 24,
+      }}
     >
-      {/* ── HEADER ── */}
-      <Text style={s.pageTitle}>Community Feed</Text>
-      <Text style={s.pageSubtitle}>
-        Discover what the gaming community is logging and organizing.
-      </Text>
-
-      <CommunityToggle activeTab={activeTab} onToggle={handleToggle} />
-
-      <View style={s.divider} />
-
-      {/* ── CONTENT ── */}
-      {loading ? (
-        <CommunityVaultsPageSkeleton />
-      ) : vaults.length === 0 ? (
-        <View style={s.emptyState}>
-          <Text style={s.emptyText}>No community vaults yet.</Text>
-        </View>
-      ) : (
-        <Animated.View
-          style={{
-            opacity: fadeAnim,
-            transform: [{ translateY: translateAnim }],
-            gap: 24,
-          }}
-        >
-          {vaults.map((vault) => (
-            <CommunityVaultCard
-              key={vault._id}
-              vault={vault}
-              currentUserId={currentUserId}
-            />
-          ))}
-        </Animated.View>
-      )}
-    </ScrollView>
-  );
-}
-
-// ─── SCREEN ───────────────────────────────────────────────────────────────────
-
-export function CommunityVaultsScreen() {
-  return (
-    <DashboardLayout>
-      <CommunityVaultsContent />
-    </DashboardLayout>
+      {vaults.map((vault) => (
+        <CommunityVaultCard
+          key={vault._id}
+          vault={vault}
+          currentUserId={currentUserId}
+        />
+      ))}
+    </Animated.View>
   );
 }
 
 // ─── STYLES ───────────────────────────────────────────────────────────────────
 
 const s = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 60,
-  },
-  pageTitle: {
-    color: "#F7F4F5",
-    fontSize: 18,
-    fontWeight: "800",
-    marginBottom: 4,
-    letterSpacing: 0.3,
-  },
-  pageSubtitle: {
-    color: "#8A6D73",
-    fontSize: 13,
-    marginBottom: 20,
-  },
-
-  // Toggle
-  toggleWrap: {
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  toggleTrack: {
-    position: "relative",
-    flexDirection: "row",
-    backgroundColor: "#160408",
-    borderWidth: 1,
-    borderColor: "#28070F",
-    borderRadius: 24,
-    padding: 2,
-    width: 280,
-    height: 40,
-  },
-  toggleCapsule: {
-    position: "absolute",
-    top: 2,
-    width: "48%",
-    height: 34,
-    backgroundColor: "#9E1B32",
-    borderRadius: 20,
-    zIndex: 1,
-  },
-  toggleBtn: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 2,
-  },
-  toggleLabel: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#8A6D73",
-  },
-  toggleLabelActive: {
-    color: "#FFF",
-  },
-
-  divider: {
-    height: 1,
-    backgroundColor: "#28070F",
-    marginBottom: 28,
-  },
-
   emptyState: {
     paddingVertical: 60,
     alignItems: "center",

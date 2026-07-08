@@ -4,21 +4,18 @@ import {
   Text,
   Image,
   TouchableOpacity,
-  ScrollView,
   StyleSheet,
   Animated,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../App";
-import { DashboardLayout } from "../components/DashboardLayout";
 import { ReviewEngagement } from "../components/ReviewEngagement";
 import { DeleteConfirmMenu } from "../components/DeleteConfirmMenu";
 import { EditedTag } from "../components/EditedTag";
 import { CommunityReviewsPageSkeleton } from "../LoadingScreens/CommunityReviewsPageSkeleton";
 import { cpToast } from "../utils/toast";
 import { storage } from "../utils/storage";
-import { routes } from "../navigation/routes";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 const STATIC_BASE_URL = API_URL!.replace(/\/api\/?$/, "");
@@ -52,57 +49,6 @@ interface CommunityReview {
   editedAt?: string | null;
   coverImage: string | null;
   releasedDate: string | null;
-}
-
-// ─── COMMUNITY TOGGLE ─────────────────────────────────────────────────────────
-
-function CommunityToggle({ activeTab, onToggle }: { activeTab: "reviews" | "vaults"; onToggle: (tab: "reviews" | "vaults") => void }) {
-  const slideAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.timing(slideAnim, {
-      toValue: activeTab === "vaults" ? 1 : 0,
-      duration: 250,
-      useNativeDriver: false,
-    }).start();
-  }, [activeTab]);
-
-  return (
-    <View style={s.toggleWrap}>
-      <View style={s.toggleTrack}>
-        {/* Sliding capsule */}
-        <Animated.View
-          style={[
-            s.toggleCapsule,
-            {
-              left: slideAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: ["1%", "51%"],
-              }),
-            },
-          ]}
-        />
-        <TouchableOpacity
-          style={s.toggleBtn}
-          onPressIn={() => onToggle("reviews")}
-          activeOpacity={1}
-        >
-          <Text style={[s.toggleLabel, activeTab === "reviews" && s.toggleLabelActive]}>
-            Reviews
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={s.toggleBtn}
-          onPressIn={() => onToggle("vaults")}
-          activeOpacity={1}
-        >
-          <Text style={[s.toggleLabel, activeTab === "vaults" && s.toggleLabelActive]}>
-            Vaults
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
 }
 
 // ─── USER AVATAR ──────────────────────────────────────────────────────────────
@@ -192,7 +138,6 @@ function CommunityReviewCard({
           <DeleteConfirmMenu
             onEdit={() => onEdit(review)}
             onDelete={handleDeleteReview}
-            // cancelMessage="Review not deleted."
             confirmMessage="Are you sure you want to delete this review?"
           />
         )}
@@ -200,7 +145,6 @@ function CommunityReviewCard({
 
       {/* ── REVIEW BODY ── */}
       <View style={s.cardBody}>
-        {/* Cover image */}
         <View style={s.coverWrap}>
           {review.coverImage ? (
             <Image source={{ uri: review.coverImage }} style={s.coverImage} />
@@ -211,7 +155,6 @@ function CommunityReviewCard({
           )}
         </View>
 
-        {/* Text content */}
         <View style={s.textContent}>
           <View style={s.titleRow}>
             <View style={{ flex: 1, minWidth: 0 }}>
@@ -251,15 +194,15 @@ function CommunityReviewCard({
   );
 }
 
-// ─── SCREEN CONTENT ───────────────────────────────────────────────────────────
+// ─── FEED (exported) ──────────────────────────────────────────────────────────
 
-function CommunityReviewsContent() {
+export function CommunityReviewsFeed() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [reviews, setReviews] = useState<CommunityReview[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"reviews" | "vaults">("reviews");
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const translateAnim = useRef(new Animated.Value(16)).current;
+  const [resolvedUserId, setResolvedUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -280,7 +223,6 @@ function CommunityReviewsContent() {
     load();
   }, []);
 
-  // Fade-up animation when content loads
   useEffect(() => {
     if (!loading) {
       Animated.parallel([
@@ -297,13 +239,6 @@ function CommunityReviewsContent() {
       ]).start();
     }
   }, [loading]);
-
-  const currentUserId: string | null = (() => {
-    // Decoded synchronously from token cached in state — set during load
-    return null; // will be resolved below
-  })();
-
-  const [resolvedUserId, setResolvedUserId] = useState<string | null>(null);
 
   useEffect(() => {
     storage.getToken().then((token) => {
@@ -336,139 +271,40 @@ function CommunityReviewsContent() {
     });
   };
 
-  const handleToggle = (tab: "reviews" | "vaults") => {
-    if (tab === "vaults") {
-      navigation.navigate("CommunityVaults");
-    }
-    setActiveTab(tab);
-  };
+  if (loading) return <CommunityReviewsPageSkeleton />;
+
+  if (reviews.length === 0) {
+    return (
+      <View style={s.emptyState}>
+        <Text style={s.emptyText}>No community reviews yet.</Text>
+      </View>
+    );
+  }
 
   return (
-    <ScrollView
-      style={s.scrollView}
-      contentContainerStyle={s.scrollContent}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
+    <Animated.View
+      style={{
+        opacity: fadeAnim,
+        transform: [{ translateY: translateAnim }],
+        gap: 24,
+      }}
     >
-      {/* ── HEADER ── */}
-      <Text style={s.pageTitle}>Community Feed</Text>
-      <Text style={s.pageSubtitle}>
-        Discover what the gaming community is logging and organizing.
-      </Text>
-
-      <CommunityToggle activeTab={activeTab} onToggle={handleToggle} />
-
-      <View style={s.divider} />
-
-      {/* ── CONTENT ── */}
-      {loading ? (
-        <CommunityReviewsPageSkeleton />
-      ) : reviews.length === 0 ? (
-        <View style={s.emptyState}>
-          <Text style={s.emptyText}>No community reviews yet.</Text>
-        </View>
-      ) : (
-        <Animated.View
-          style={{
-            opacity: fadeAnim,
-            transform: [{ translateY: translateAnim }],
-            gap: 24,
-          }}
-        >
-          {reviews.map((review) => (
-            <CommunityReviewCard
-              key={review._id}
-              review={review}
-              currentUserId={resolvedUserId}
-              onDelete={handleDelete}
-              onEdit={handleEdit}
-            />
-          ))}
-        </Animated.View>
-      )}
-    </ScrollView>
-  );
-}
-
-// ─── SCREEN ───────────────────────────────────────────────────────────────────
-
-export function CommunityReviewsScreen() {
-  return (
-    <DashboardLayout>
-      <CommunityReviewsContent />
-    </DashboardLayout>
+      {reviews.map((review) => (
+        <CommunityReviewCard
+          key={review._id}
+          review={review}
+          currentUserId={resolvedUserId}
+          onDelete={handleDelete}
+          onEdit={handleEdit}
+        />
+      ))}
+    </Animated.View>
   );
 }
 
 // ─── STYLES ───────────────────────────────────────────────────────────────────
 
 const s = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 60,
-  },
-  pageTitle: {
-    color: "#F7F4F5",
-    fontSize: 18,
-    fontWeight: "800",
-    marginBottom: 4,
-    letterSpacing: 0.3,
-  },
-  pageSubtitle: {
-    color: "#8A6D73",
-    fontSize: 13,
-    marginBottom: 20,
-  },
-
-  // Toggle
-  toggleWrap: {
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  toggleTrack: {
-    position: "relative",
-    flexDirection: "row",
-    backgroundColor: "#160408",
-    borderWidth: 1,
-    borderColor: "#28070F",
-    borderRadius: 24,
-    padding: 2,
-    width: 280,
-    height: 40,
-  },
-  toggleCapsule: {
-    position: "absolute",
-    top: 2,
-    width: "48%",
-    height: 34,
-    backgroundColor: "#9E1B32",
-    borderRadius: 20,
-    zIndex: 1,
-  },
-  toggleBtn: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 2,
-  },
-  toggleLabel: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#8A6D73",
-  },
-  toggleLabelActive: {
-    color: "#FFF",
-  },
-
-  divider: {
-    height: 1,
-    backgroundColor: "#28070F",
-    marginBottom: 28,
-  },
-
   emptyState: {
     paddingVertical: 60,
     alignItems: "center",
