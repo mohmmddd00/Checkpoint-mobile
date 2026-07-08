@@ -9,6 +9,8 @@ import {
   Modal,
   StyleSheet,
   ActivityIndicator,
+  Pressable,
+  Keyboard,
 } from "react-native";
 import { DashboardLayout } from "../components/DashboardLayout";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -172,22 +174,22 @@ function LogModal({
 
   const platformOptions = extractPlatforms(game);
 
+  const handleClose = () => {
+    if (submitting) return;
+    onClose();
+  };
+
   return (
-    <Modal visible transparent animationType="fade" onRequestClose={onClose}>
+    <Modal visible transparent animationType="fade" onRequestClose={handleClose}>
       {/* Backdrop — tapping it closes the modal */}
-      <TouchableOpacity
-        style={styles.backdrop}
-        activeOpacity={1}
-        onPress={onClose}
-      >
-        <View style={styles.modalKAV}>
-          {/* Inner card — stops backdrop tap from closing when tapping inside */}
-          <TouchableOpacity activeOpacity={1} style={styles.modalCard}>
-            <ScrollView
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.modalContent}
-            >
+      <Pressable style={styles.backdrop} onPress={handleClose}>
+        <Pressable style={styles.modalCard} onPress={() => {}}>
+          <ScrollView
+            keyboardShouldPersistTaps="always"
+            keyboardDismissMode="none"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.modalContent}
+          >
               {/* Header */}
               <View style={styles.modalHeader}>
                 <View style={{ flex: 1 }}>
@@ -218,6 +220,7 @@ function LogModal({
                   placeholderTextColor="rgba(255,255,255,0.3)"
                   keyboardType="decimal-pad"
                   style={styles.textInput}
+                  onSubmitEditing={() => Keyboard.dismiss()}
                 />
               </View>
 
@@ -313,6 +316,8 @@ function LogModal({
                   placeholderTextColor="rgba(255,255,255,0.3)"
                   multiline
                   numberOfLines={4}
+                  blurOnSubmit={true}
+                  onSubmitEditing={() => Keyboard.dismiss()}
                   style={[styles.textInput, styles.textArea]}
                   textAlignVertical="top"
                 />
@@ -331,10 +336,10 @@ function LogModal({
                   <Text style={styles.submitBtnText}>Log</Text>
                 )}
               </TouchableOpacity>
-            </ScrollView>
-          </TouchableOpacity>
-        </View>
-      </TouchableOpacity>
+              <View style={{ height: 170 }} />
+          </ScrollView>
+        </Pressable>
+      </Pressable>
     </Modal>
   );
 }
@@ -450,10 +455,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
   },
-  modalKAV: {
-    width: "100%",
-  },
   modalCard: {
+    width: "100%",
+    maxHeight: "64.3%",
     backgroundColor: "#160408",
     borderWidth: 1,
     borderColor: "#380B14",
