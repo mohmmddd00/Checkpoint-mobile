@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  ScrollView,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import axios from "axios";
@@ -111,9 +111,11 @@ export function AuthPage({ mode }: AuthPageProps) {
     <View style={styles.container}>
       <AuthBackground />
 
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
+        enableOnAndroid
+        extraScrollHeight={-100}
       >
         <Text style={styles.logo}>CHECKPOINT</Text>
 
@@ -254,7 +256,7 @@ export function AuthPage({ mode }: AuthPageProps) {
             </TouchableOpacity>
           )}
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </View>
   );
 }
