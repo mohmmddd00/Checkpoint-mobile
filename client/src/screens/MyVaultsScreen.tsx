@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View, Text, ScrollView, TouchableOpacity,
   Image, StyleSheet,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../App";
 import { DashboardLayout } from "../components/DashboardLayout";
@@ -248,22 +248,24 @@ function MyVaultsContent() {
   const [vaults, setVaults] = useState<Vault[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const token = await storage.getToken();
-        const res = await fetch(`${API_URL}/vaults`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) setVaults(await res.json());
-      } catch (err) {
-        console.error("Failed to load vaults:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const load = async () => {
+        try {
+          const token = await storage.getToken();
+          const res = await fetch(`${API_URL}/vaults`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.ok) setVaults(await res.json());
+        } catch (err) {
+          console.error("Failed to load vaults:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      load();
+    }, [])
+  );
 
   if (loading) {
     return (
