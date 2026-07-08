@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   View, Text, ScrollView, Image, TouchableOpacity,
-  StyleSheet, ActivityIndicator,
+  StyleSheet, ActivityIndicator, Animated,
 } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -294,6 +294,8 @@ function ProfileContent() {
   const [vaults, setVaults] = useState<Vault[]>([]);
   const [vaultCount, setVaultCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(12)).current;
 
   const load = useCallback(async () => {
     const token = await storage.getToken();
@@ -338,6 +340,10 @@ function ProfileContent() {
       console.error("Failed to load profile:", err);
     } finally {
       setLoading(false);
+      Animated.parallel([
+        Animated.timing(opacity, { toValue: 1, duration: 350, useNativeDriver: true }),
+        Animated.timing(translateY, { toValue: 0, duration: 350, useNativeDriver: true }),
+      ]).start();
     }
   }, []);
 
@@ -366,7 +372,10 @@ function ProfileContent() {
   const avatarUrl = resolveAvatarUrl(profile?.profileImage);
 
   return (
-    <ScrollView style={s.container} contentContainerStyle={s.content}>
+    <Animated.ScrollView
+      style={[s.container, { opacity, transform: [{ translateY }] }]}
+      contentContainerStyle={s.content}
+    >
 
       {/* ── HERO ── */}
       <View style={s.heroBox}>
@@ -490,7 +499,7 @@ function ProfileContent() {
         )}
       </View>
 
-    </ScrollView>
+    </Animated.ScrollView>
   );
 }
 

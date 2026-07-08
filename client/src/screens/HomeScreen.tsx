@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   View, Text, FlatList, TouchableOpacity,
-  Image, StyleSheet, useWindowDimensions,
+  Image, StyleSheet, useWindowDimensions, Animated,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -27,6 +27,8 @@ function WelcomeContent() {
 
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(12)).current;
 
   useEffect(() => {
     const fetchGames = async () => {
@@ -46,6 +48,10 @@ function WelcomeContent() {
         console.error("Failed fetching games:", err);
       } finally {
         setLoading(false);
+        Animated.parallel([
+          Animated.timing(opacity, { toValue: 1, duration: 350, useNativeDriver: true }),
+          Animated.timing(translateY, { toValue: 0, duration: 350, useNativeDriver: true }),
+        ]).start();
       }
     };
 
@@ -66,7 +72,7 @@ function WelcomeContent() {
   if (loading) return <WelcomePageSkeleton />;
 
   return (
-    <FlatList
+    <Animated.FlatList
       data={games}
       keyExtractor={(item) => item.id.toString()}
       numColumns={numColumns}
@@ -83,6 +89,7 @@ function WelcomeContent() {
         <Text style={styles.emptyText}>No games found matching your search.</Text>
       }
       columnWrapperStyle={numColumns > 1 ? styles.columnWrapper : undefined}
+      style={{ opacity, transform: [{ translateY }] }}
       renderItem={({ item: game }) => {
         const releaseYear = game.released ? game.released.split("-")[0] : "TBA";
         return (
