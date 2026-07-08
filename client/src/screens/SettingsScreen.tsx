@@ -5,7 +5,9 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Animated,
 } from "react-native";
+import { useFadeUp } from "../hooks/useFadeUp";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { DashboardLayout } from "../components/DashboardLayout";
@@ -25,10 +27,12 @@ export function SettingsScreen() {
     }
   };
 
+  const { opacity, translateY } = useFadeUp();
+
   return (
     <DashboardLayout>
-      <ScrollView
-        style={styles.scroll}
+      <Animated.ScrollView
+        style={[styles.scroll, { opacity, transform: [{ translateY }] }]}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
@@ -49,7 +53,7 @@ export function SettingsScreen() {
 
         {/* Hint */}
         <Text style={styles.hint}>Select a setting above to get started.</Text>
-      </ScrollView>
+      </Animated.ScrollView>
     </DashboardLayout>
   );
 }

@@ -6,7 +6,9 @@ import {
   StyleSheet,
   Linking,
   TouchableOpacity,
+  Animated,
 } from "react-native";
+import { useFadeUp } from "../hooks/useFadeUp";
 import { DashboardLayout } from "../components/DashboardLayout";
 import Svg, { Rect, Line, Circle, Polygon, Path, Polyline } from "react-native-svg";
 
@@ -172,10 +174,12 @@ const FEATURES = [
 // ── Screen ────────────────────────────────────────────────────────────────────
 
 export function AboutScreen() {
+  const { opacity, translateY } = useFadeUp();
+
   return (
     <DashboardLayout>
-      <ScrollView
-        style={styles.scroll}
+      <Animated.ScrollView
+        style={[styles.scroll, { opacity, transform: [{ translateY }] }]}
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
@@ -249,7 +253,7 @@ export function AboutScreen() {
             © {new Date().getFullYear()} Checkpoint
           </Text>
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
     </DashboardLayout>
   );
 }
