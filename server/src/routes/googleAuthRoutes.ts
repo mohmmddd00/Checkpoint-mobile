@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 const router = Router();
 
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
+const MOBILE_SCHEME = process.env.MOBILE_SCHEME || "checkpoint";
 
 // ─── INITIATE GOOGLE LOGIN ────────────────────────────────────────────────────
 // When user clicks "Continue with Google", they hit this route.
@@ -28,8 +29,10 @@ router.get(
   (req, res) => {
     try {
       const user = req.user as any;
+      const isMobile = (req.query.state as string | undefined)?.includes("mobile");
 
       if (!process.env.JWT_SECRET) {
+        if (isMobile) return res.redirect(`${MOBILE_SCHEME}://auth/error?reason=server_error`);
         return res.redirect(`${CLIENT_URL}/login?error=server_error`);
       }
 
@@ -39,15 +42,18 @@ router.get(
         { expiresIn: "7d" }
       );
 
-      // Check if this user still has a temporary username (new Google user)
-      // If so, redirect to complete profile page with the token
       const isTemporaryUsername = user.username?.startsWith("user_");
+
+      if (isMobile) {
+        if (isTemporaryUsername) {
+          return res.redirect(`${MOBILE_SCHEME}://complete-profile?token=${token}`);
+        }
+        return res.redirect(`${MOBILE_SCHEME}://auth/callback?token=${token}`);
+      }
 
       if (isTemporaryUsername) {
         return res.redirect(`${CLIENT_URL}/complete-profile?token=${token}`);
       }
-
-      // Existing user — redirect straight to callback handler with token
       return res.redirect(`${CLIENT_URL}/auth/callback?token=${token}`);
     } catch {
       return res.redirect(`${CLIENT_URL}/login?error=server_error`);

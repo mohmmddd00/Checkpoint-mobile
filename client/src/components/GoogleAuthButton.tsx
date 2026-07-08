@@ -1,6 +1,14 @@
-import { TouchableOpacity, Text, StyleSheet, View } from "react-native";
+import { TouchableOpacity, Text, StyleSheet } from "react-native";
 import * as WebBrowser from "expo-web-browser";
+import * as Linking from "expo-linking";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Svg, { Path } from "react-native-svg";
+import { storage } from "../utils/storage";
+import { cpToast } from "../utils/toast";
+import type { RootStackParamList } from "../../App";
+
+WebBrowser.maybeCompleteAuthSession();
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -10,11 +18,48 @@ interface GoogleAuthButtonProps {
 }
 
 export function GoogleAuthButton({ label = "Continue with Google", mode = "login" }: GoogleAuthButtonProps) {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
   const handleGoogleAuth = async () => {
     const base = API_URL!.replace(/\/api\/?$/, "");
-    const prompt = mode === "register" ? "?prompt=select_account" : "";
-    const url = `${base}/api/auth/google${prompt}`;
-    await WebBrowser.openBrowserAsync(url);
+    const promptParam = mode === "register" ? "&prompt=select_account" : "";
+    const url = `${base}/api/auth/google?state=mobile${promptParam}`;
+
+    const result = await WebBrowser.openAuthSessionAsync(url, "checkpoint://");
+
+    if (result.type !== "success") return;
+
+    const { url: redirectedUrl } = result;
+
+    // checkpoint://auth/callback?token=...
+    if (redirectedUrl.includes("auth/callback")) {
+      const parsed = Linking.parse(redirectedUrl);
+      const token = parsed.queryParams?.token as string | undefined;
+      if (!token) {
+        cpToast.error("Login failed. Please try again.");
+        return;
+      }
+      await storage.setToken(token);
+      navigation.reset({ index: 0, routes: [{ name: "Home" }] });
+      return;
+    }
+
+    // checkpoint://complete-profile?token=...
+    if (redirectedUrl.includes("complete-profile")) {
+      const parsed = Linking.parse(redirectedUrl);
+      const token = parsed.queryParams?.token as string | undefined;
+      if (!token) {
+        cpToast.error("Something went wrong. Please try again.");
+        return;
+      }
+      navigation.navigate("CompleteProfile", { token });
+      return;
+    }
+
+    // checkpoint://auth/error
+    if (redirectedUrl.includes("auth/error")) {
+      cpToast.error("Google sign-in failed. Please try again.");
+    }
   };
 
   return (

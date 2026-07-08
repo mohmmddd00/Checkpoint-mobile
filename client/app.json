@@ -26,6 +26,7 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "scheme": "checkpoint",
     "plugins": [
       "expo-web-browser"
     ]
