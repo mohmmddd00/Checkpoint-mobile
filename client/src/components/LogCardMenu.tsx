@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   ScrollView,
   Pressable,
+  Keyboard,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { cpToast } from "../utils/toast";
@@ -130,6 +131,7 @@ function EditLogModal({
                 placeholder="e.g. 8 or 7.5"
                 placeholderTextColor="rgba(255,255,255,0.25)"
                 keyboardType="decimal-pad"
+                onSubmitEditing={() => Keyboard.dismiss()}
                 style={m.input}
               />
             </View>
@@ -202,6 +204,8 @@ function EditLogModal({
                 placeholderTextColor="rgba(255,255,255,0.25)"
                 multiline
                 numberOfLines={4}
+                blurOnSubmit={true}
+                onSubmitEditing={() => Keyboard.dismiss()}
                 style={[m.input, m.textarea]}
                 textAlignVertical="top"
               />
