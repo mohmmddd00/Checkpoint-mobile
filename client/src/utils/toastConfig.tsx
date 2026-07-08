@@ -51,8 +51,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    marginHorizontal: 16,
-    maxWidth: 360,
+    alignSelf: "center",
+    maxWidth: "75%",
     gap: 10,
     shadowColor: "#000",
     shadowOpacity: 0.6,
@@ -66,9 +66,9 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   message: {
-    flex: 1,
     color: "#F7F4F5",
     fontSize: 14,
     fontWeight: "600",
+    flexShrink: 1,
   },
 });

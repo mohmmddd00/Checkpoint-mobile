@@ -73,6 +73,7 @@ export function AuthPage({ mode }: AuthPageProps) {
           password,
         });
         await storage.setToken(response.data.token);
+        cpToast.success(`Welcome back, ${response.data.username || loginUsername}!`);
         navigation.navigate("Home");
       } else {
         if (firstName.trim().length < 2) { setError("First name must be at least 2 characters."); setLoading(false); return; }
