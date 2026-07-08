@@ -708,7 +708,6 @@ const styles = StyleSheet.create({
     borderColor: "rgba(158,27,50,0.4)",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 10,
   },
   quickLogIcon: {
     color: "#E6A1B0",
