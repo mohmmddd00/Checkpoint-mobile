@@ -108,7 +108,7 @@ export function LogModal({ game, onClose }: LogModalProps) {
     <Modal visible animationType="fade" transparent onRequestClose={handleClose}>
       <Pressable style={styles.overlay} onPress={handleClose}>
         <Pressable style={styles.sheet} onPress={() => {}}>
-          <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+          <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="always" keyboardDismissMode="none">
 
             {/* HEADER */}
             <View style={styles.header}>
@@ -219,6 +219,7 @@ export function LogModal({ game, onClose }: LogModalProps) {
                 : <Text style={styles.submitBtnText}>Log</Text>
               }
             </TouchableOpacity>
+            <View style={{ height: 150 }} />
 
           </ScrollView>
         </Pressable>
@@ -238,6 +239,8 @@ const styles = StyleSheet.create({
   sheet: {
     width: "100%",
     maxWidth: 420,
+    maxHeight: "62.5%",
+    // maxHeight: "100%",
     backgroundColor: "#160408",
     borderWidth: 1,
     borderColor: "#380B14",
