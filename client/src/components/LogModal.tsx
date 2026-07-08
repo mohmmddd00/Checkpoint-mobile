@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#380B14",
     borderRadius: 12,
-    padding: 28,
+    padding: 26,
   },
   header: {
     flexDirection: "row",
