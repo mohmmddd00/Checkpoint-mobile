@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   View, Text, TextInput, TouchableOpacity, Modal,
-  StyleSheet, ScrollView, ActivityIndicator, Pressable,
+  StyleSheet, ScrollView, ActivityIndicator, Pressable, Keyboard,
 } from "react-native";
 import { storage } from "../utils/storage";
 import { cpToast } from "../utils/toast";
@@ -131,6 +131,7 @@ export function LogModal({ game, onClose }: LogModalProps) {
                 value={rating}
                 onChangeText={setRating}
                 keyboardType="decimal-pad"
+                onSubmitEditing={() => Keyboard.dismiss()}
               />
             </View>
 
@@ -203,6 +204,8 @@ export function LogModal({ game, onClose }: LogModalProps) {
                 onChangeText={setReview}
                 multiline
                 numberOfLines={4}
+                blurOnSubmit={true}
+                onSubmitEditing={() => Keyboard.dismiss()}
                 textAlignVertical="top"
               />
             </View>
