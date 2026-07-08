@@ -9,7 +9,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { DashboardLayout } from "../components/DashboardLayout";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Svg, { Circle, Line } from "react-native-svg";
 import { GameSearchResults } from "../components/GameSearchResults";
@@ -354,7 +354,7 @@ export function QuickLogScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <DashboardLayout>
       <QuickLogSearch key={searchKey} onSelect={setSelectedGame} />
       {selectedGame && (
         <LogModal
@@ -363,7 +363,7 @@ export function QuickLogScreen() {
           onBack={handleBack}
         />
       )}
-    </SafeAreaView>
+    </DashboardLayout>
   );
 }
 
@@ -374,6 +374,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#0D0204",
   },
+  // (kept for reference, layout now handled by DashboardLayout)
 
   // ── Search ──
   searchContainer: {
@@ -382,7 +383,7 @@ const styles = StyleSheet.create({
   },
   searchContent: {
     alignItems: "center",
-    paddingTop: 80,
+    paddingTop: 40,
     paddingBottom: 60,
     paddingHorizontal: 20,
   },
