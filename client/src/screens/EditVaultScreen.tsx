@@ -14,7 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Toast from "react-native-toast-message";
+import { cpToast } from "../utils/toast";
 import { RootStackParamList } from "../../App";
 import { GameSearchResults, type Game } from "../components/GameSearchResults";
 import { EditVaultScreenSkeleton } from "../LoadingScreens/EditVaultPageSkeleton";
@@ -76,11 +76,11 @@ export function EditVaultScreen() {
           originalDescriptionRef.current = data.description;
           originalGamesRef.current = data.games;
         } else {
-          Toast.show({ type: "error", text1: "Could not load vault." });
+          cpToast.error("Could not load vault.");
           navigation.goBack();
         }
       } catch {
-        Toast.show({ type: "error", text1: "Could not load vault." });
+        cpToast.error("Could not load vault.");
         navigation.goBack();
       } finally {
         setLoading(false);
@@ -91,7 +91,7 @@ export function EditVaultScreen() {
 
   const handleSelectGame = (game: Game) => {
     if (games.some((g) => g.gameId === game.id)) {
-      Toast.show({ type: "error", text1: `"${game.name}" is already in this vault.` });
+      cpToast.error(`"${game.name}" is already in this vault.`);
       setSearchQuery("");
       return;
     }
@@ -109,7 +109,7 @@ export function EditVaultScreen() {
 
   const handleSave = async () => {
     if (!title.trim()) {
-      Toast.show({ type: "error", text1: "Title cannot be empty." });
+      cpToast.error("Title cannot be empty.");
       return;
     }
     setSaving(true);
@@ -128,13 +128,13 @@ export function EditVaultScreen() {
         }),
       });
       if (res.ok) {
-        Toast.show({ type: "success", text1: "Vault updated." });
+        cpToast.success("Vault updated.");
         navigation.goBack();
       } else {
-        Toast.show({ type: "error", text1: "Failed to update vault." });
+        cpToast.error("Failed to update vault.");
       }
     } catch {
-      Toast.show({ type: "error", text1: "Failed to update vault." });
+      cpToast.error("Failed to update vault.");
     } finally {
       setSaving(false);
     }

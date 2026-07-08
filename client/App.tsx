@@ -2,6 +2,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { LoginScreen } from "./src/screens/LoginScreen";
 import Toast from "react-native-toast-message";
+import { toastConfig } from "./src/utils/toastConfig";
 import { RegisterScreen } from "./src/screens/RegistrationScreen";
 import { HomeScreen } from "./src/screens/HomeScreen";
 import { GameScreen } from "./src/screens/GameScreen";
@@ -74,7 +75,7 @@ export default function App() {
         <Stack.Screen name="EditReview" component={EditReviewScreen} />
       </Stack.Navigator>
     </NavigationContainer>
-    <Toast />
+    <Toast config={toastConfig} topOffset={60} />
     </>
   );
 }

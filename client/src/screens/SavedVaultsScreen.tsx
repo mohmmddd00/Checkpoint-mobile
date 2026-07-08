@@ -17,7 +17,7 @@ import { useUnsaveAnimation } from "../hooks/useUnsaveAnimation";
 import { DashboardLayout } from "../components/DashboardLayout";
 import { SavedVaultsPageSkeleton } from "../LoadingScreens/SavedVaultsPageSkeleton";
 import { storage } from "../utils/storage";
-import Toast from "react-native-toast-message";
+import { cpToast } from "../utils/toast";
 import { useFadeUp } from "../hooks/useFadeUp";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "";
@@ -176,15 +176,15 @@ function SavedVaultCard({
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
-        Toast.show({ type: "success", text1: "Vault unsaved." });
+        cpToast.success("Vault unsaved.");
         trigger();
       } else {
         setFilled(true);
-        Toast.show({ type: "error", text1: "Failed to unsave vault." });
+        cpToast.error("Failed to unsave vault.");
       }
     } catch {
       setFilled(true);
-      Toast.show({ type: "error", text1: "Failed to unsave vault." });
+      cpToast.error("Failed to unsave vault.");
     }
   };
 

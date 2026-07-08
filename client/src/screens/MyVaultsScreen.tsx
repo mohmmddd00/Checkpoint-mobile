@@ -10,7 +10,7 @@ import { DashboardLayout } from "../components/DashboardLayout";
 import { DeleteConfirmMenu } from "../components/DeleteConfirmMenu";
 import { MyVaultsPageSkeleton } from "../LoadingScreens/MyVaultsPageSkeleton";
 import { storage } from "../utils/storage";
-import Toast from "react-native-toast-message";
+import { cpToast } from "../utils/toast";
 import { useFadeUp } from "../hooks/useFadeUp";
 import { Animated } from "react-native";
 
@@ -112,10 +112,10 @@ function VaultListCard({
       headers: { Authorization: `Bearer ${token}` },
     });
     if (res.ok) {
-      Toast.show({ type: "success", text1: "Vault deleted." });
+      cpToast.success("Vault deleted.");
       onDeleted(vault._id);
     } else {
-      Toast.show({ type: "error", text1: "Failed to delete vault." });
+      cpToast.error("Failed to delete vault.");
     }
   };
 

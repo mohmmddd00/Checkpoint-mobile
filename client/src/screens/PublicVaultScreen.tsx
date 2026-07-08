@@ -14,7 +14,7 @@ import { RootStackParamList } from "../../App";
 import { DashboardLayout } from "../components/DashboardLayout";
 import { PublicVaultPageSkeleton } from "../LoadingScreens/PublicVaultPageSkeleton";
 import { storage } from "../utils/storage";
-import Toast from "react-native-toast-message";
+import { cpToast } from "../utils/toast";
 import { useFadeUp } from "../hooks/useFadeUp";
 import { Animated } from "react-native";
 
@@ -195,13 +195,13 @@ function PublicVaultContent() {
                 headers: { Authorization: `Bearer ${token}` },
               });
               if (res.ok) {
-                Toast.show({ type: "success", text1: "Vault deleted." });
+                cpToast.success("Vault deleted.");
                 navigation.navigate("CommunityReviews");
               } else {
-                Toast.show({ type: "error", text1: "Failed to delete vault." });
+                cpToast.error("Failed to delete vault.");
               }
             } catch {
-              Toast.show({ type: "error", text1: "Failed to delete vault." });
+              cpToast.error("Failed to delete vault.");
             }
           },
         },

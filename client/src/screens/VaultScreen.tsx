@@ -12,7 +12,7 @@ import { storage } from "../utils/storage";
 import { useFadeUp } from "../hooks/useFadeUp";
 import { Animated } from "react-native";
 import { DeleteConfirmMenu } from "../components/DeleteConfirmMenu";
-import Toast from "react-native-toast-message";
+import { cpToast } from "../utils/toast";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "";
 
@@ -109,10 +109,10 @@ function VaultContent() {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (res.ok) {
-      Toast.show({ type: "success", text1: "Vault deleted." });
+      cpToast.success("Vault deleted.");
       navigation.navigate("MyVaults");
     } else {
-      Toast.show({ type: "error", text1: "Failed to delete vault." });
+      cpToast.error("Failed to delete vault.");
     }
   };
 

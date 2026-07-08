@@ -16,7 +16,7 @@ import { DashboardLayout } from "../components/DashboardLayout";
 import { GameSearchResults, type Game } from "../components/GameSearchResults";
 import { storage } from "../utils/storage";
 import { useFadeUp } from "../hooks/useFadeUp";
-import Toast from "react-native-toast-message";
+import { cpToast } from "../utils/toast";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "";
 
@@ -73,7 +73,7 @@ function VaultCreationContent() {
 
   const handleSelectGame = (game: Game) => {
     if (games.some((g) => g.gameId === game.id)) {
-      Toast.show({ type: "error", text1: `"${game.name}" is already in this vault.` });
+      cpToast.error(`"${game.name}" is already in this vault.`);
       setSearchQuery("");
       return;
     }
@@ -91,7 +91,7 @@ function VaultCreationContent() {
 
   const handleCreate = async () => {
     if (!title.trim()) {
-      Toast.show({ type: "error", text1: "Please give your vault a title." });
+      cpToast.error("Please give your vault a title.");
       return;
     }
     setSaving(true);
@@ -106,14 +106,14 @@ function VaultCreationContent() {
         body: JSON.stringify({ title: title.trim(), description: description.trim(), games }),
       });
       if (res.ok) {
-        Toast.show({ type: "success", text1: "Vault Created!" });
+        cpToast.success("Vault Created!");
         navigation.navigate("MyVaults");
       } else {
         const err = await res.json();
-        Toast.show({ type: "error", text1: err.message ?? "Failed to create vault." });
+        cpToast.error(err.message ?? "Failed to create vault.");
       }
     } catch {
-      Toast.show({ type: "error", text1: "Failed to create vault." });
+      cpToast.error("Failed to create vault.");
     } finally {
       setSaving(false);
     }
