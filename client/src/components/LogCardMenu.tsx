@@ -109,18 +109,18 @@ function EditLogModal({
     <Modal visible animationType="fade" transparent onRequestClose={onClose}>
       <Pressable style={m.backdrop} onPress={onClose}>
         <Pressable style={m.sheet} onPress={() => {}}>
-          {/* Header */}
-          <View style={m.header}>
-            <View>
-              <Text style={m.headerTitle}>Edit Log</Text>
-              <Text style={m.headerSub}>{log.name}</Text>
+          <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="always" keyboardDismissMode="none">
+            {/* Header */}
+            <View style={m.header}>
+              <View>
+                <Text style={m.headerTitle}>Edit Log</Text>
+                <Text style={m.headerSub}>{log.name}</Text>
+              </View>
+              <TouchableOpacity onPress={onClose} disabled={submitting}>
+                <Text style={m.closeBtn}>✕</Text>
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity onPress={onClose} disabled={submitting}>
-              <Text style={m.closeBtn}>✕</Text>
-            </TouchableOpacity>
-          </View>
 
-          <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
             {/* Rating */}
             <View style={m.field}>
               <Text style={m.label}>Rating (1–10)</Text>
@@ -218,6 +218,7 @@ function EditLogModal({
                 : <Text style={m.saveBtnText}>Save Changes</Text>
               }
             </TouchableOpacity>
+            <View style={{ height: 150 }} />
           </ScrollView>
         </Pressable>
       </Pressable>
@@ -422,6 +423,7 @@ const m = StyleSheet.create({
   sheet: {
     width: "100%",
     maxWidth: 420,
+    maxHeight: "62.5%",
     backgroundColor: "#160408",
     borderWidth: 1,
     borderColor: "#380B14",
