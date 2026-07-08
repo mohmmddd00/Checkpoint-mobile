@@ -206,10 +206,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Nav items */}
           <View style={styles.nav}>
             <NavItem
-              label="Dashboard"
+              label="Home"
               active={currentRoute === "Home"}
               onPress={() => { navigation.navigate("Home"); setIsPanelOpen(false); }}
-              icon="dashboard"
+              icon="home"
             />
             <NavItem
               label="My Profile"
@@ -309,12 +309,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             active={currentRoute === "Logs"}
             onPress={() => navigation.navigate("Logs")}
           />
-          <TouchableOpacity
-            style={styles.quickLogBtn}
-            onPress={() => navigation.navigate("QuickLog")}
-          >
-            <Text style={styles.quickLogIcon}>+</Text>
-          </TouchableOpacity>
+          <View style={{ flex: 1, alignItems: "center" }}>
+            <TouchableOpacity
+              style={styles.quickLogBtn}
+              onPress={() => navigation.navigate("QuickLog")}
+            >
+              <Text style={styles.quickLogIcon}>+</Text>
+            </TouchableOpacity>
+          </View>
           <TabItem
             label="Community"
             iconPath="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"
@@ -344,7 +346,7 @@ function NavItem({ label, active, onPress, icon, danger = false }: {
   danger?: boolean;
 }) {
   const iconSvgMap: Record<string, string> = {
-    dashboard: "M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z",
+    home: "M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z",
     profile: "M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z",
     logs: "M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z",
     community: "M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z",
