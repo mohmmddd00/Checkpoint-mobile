@@ -23,6 +23,7 @@ import { CompleteProfileScreen } from "./src/screens/CompleteProfileScreen";
 import { AboutScreen } from "./src/screens/AboutScreen";
 import { HallOfFameScreen } from "./src/screens/HallOfFameScreen";
 import { CommunityFeedScreen } from "./src/screens/CommunityFeedScreen";
+import { SettingsScreen } from "./src/screens/SettingsScreen";
 import { UpcomingGamesScreen } from "./src/screens/UpcomingGamesScreen";
 
 export type RootStackParamList = {
@@ -39,6 +40,8 @@ export type RootStackParamList = {
   HallOfFame: undefined;
   About: undefined;
   Settings: undefined;
+  SettingsProfile: undefined;
+  SettingsDeleteAccount: undefined;
   QuickLog: undefined;
   Game: { slug: string; game: any };
   Review: { id: string; log?: any };
@@ -85,6 +88,7 @@ export default function App() {
         <Stack.Screen name="About" component={AboutScreen} />
         <Stack.Screen name="HallOfFame" component={HallOfFameScreen} />
         <Stack.Screen name="CommunityReviews" component={CommunityFeedScreen} />
+        <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="UpcomingGames" component={UpcomingGamesScreen} />
       </Stack.Navigator>
     </NavigationContainer>
