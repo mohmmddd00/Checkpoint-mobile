@@ -20,6 +20,7 @@ import { ReviewScreen } from "./src/screens/ReviewScreen";
 import { EditReviewScreen } from "./src/screens/EditReviewScreen";
 import { VerifyAccountScreen } from "./src/screens/VerifyAccountScreen";
 import { CompleteProfileScreen } from "./src/screens/CompleteProfileScreen";
+import { AboutScreen } from "./src/screens/AboutScreen";
 
 export type RootStackParamList = {
   Login: undefined;
@@ -78,6 +79,7 @@ export default function App() {
         <Stack.Screen name="EditReview" component={EditReviewScreen} />
         <Stack.Screen name="CompleteProfile" component={CompleteProfileScreen} />
         <Stack.Screen name="VerifyAccount" component={VerifyAccountScreen} />
+        <Stack.Screen name="About" component={AboutScreen} />
       </Stack.Navigator>
     </NavigationContainer>
     <Toast config={toastConfig} topOffset={60} />
