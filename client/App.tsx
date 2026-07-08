@@ -24,6 +24,7 @@ import { AboutScreen } from "./src/screens/AboutScreen";
 import { HallOfFameScreen } from "./src/screens/HallOfFameScreen";
 import { CommunityFeedScreen } from "./src/screens/CommunityFeedScreen";
 import { SettingsScreen } from "./src/screens/SettingsScreen";
+import { SettingsProfileScreen } from "./src/screens/SettingsProfileScreen";
 import { UpcomingGamesScreen } from "./src/screens/UpcomingGamesScreen";
 
 export type RootStackParamList = {
@@ -89,6 +90,7 @@ export default function App() {
         <Stack.Screen name="HallOfFame" component={HallOfFameScreen} />
         <Stack.Screen name="CommunityReviews" component={CommunityFeedScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
+        <Stack.Screen name="SettingsProfile" component={SettingsProfileScreen} />
         <Stack.Screen name="UpcomingGames" component={UpcomingGamesScreen} />
       </Stack.Navigator>
     </NavigationContainer>
