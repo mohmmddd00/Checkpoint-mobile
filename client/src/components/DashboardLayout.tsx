@@ -33,6 +33,8 @@ interface DashboardLayoutProps {
   children: ReactNode;
 }
 
+const TOP_INSET = Platform.OS === "android" ? (StatusBar.currentHeight ?? 24) : 44;
+
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute();
@@ -217,7 +219,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <View style={styles.drawerGlow} />
 
           {/* Header */}
-          <View style={styles.drawerHeader}>
+          <View style={[styles.drawerHeader, { paddingTop: TOP_INSET + 16 }]}>
             <View style={styles.logoRow}>
               <View style={styles.logoDot} />
               <Text style={styles.logoText}>CHECKPOINT</Text>
