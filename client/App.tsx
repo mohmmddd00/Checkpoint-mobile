@@ -28,6 +28,8 @@ import { SettingsProfileScreen } from "./src/screens/SettingsProfileScreen";
 import { SettingsDeleteAccountScreen } from "./src/screens/SettingsDeleteAccountScreen";
 import { UpcomingGamesScreen } from "./src/screens/UpcomingGamesScreen";
 import { QuickLogScreen } from "./src/screens/QuickLogScreen";
+import { ForgotPasswordScreen } from "./src/screens/ForgotPasswordScreen";
+import { ResetPasswordScreen } from "./src/screens/ResetPasswordScreen";
 
 export type RootStackParamList = {
   Login: undefined;
@@ -36,6 +38,7 @@ export type RootStackParamList = {
   Home: undefined;
   VerifyAccount: { email: string };
   ForgotPassword: undefined;
+  ResetPassword: { token: string };
   Profile: undefined;
   Logs: undefined;
   CommunityReviews: undefined;
@@ -96,6 +99,8 @@ export default function App() {
         <Stack.Screen name="SettingsDeleteAccount" component={SettingsDeleteAccountScreen} />
         <Stack.Screen name="UpcomingGames" component={UpcomingGamesScreen} />
         <Stack.Screen name="QuickLog" component={QuickLogScreen} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+        <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
       </Stack.Navigator>
     </NavigationContainer>
     <Toast config={toastConfig} topOffset={60} />

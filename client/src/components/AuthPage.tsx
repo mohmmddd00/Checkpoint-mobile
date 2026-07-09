@@ -27,6 +27,7 @@ export type RootStackParamList = {
   Home: undefined;
   VerifyAccount: { email: string };
   ForgotPassword: undefined;
+  ResetPassword: { token: string };
 };
 
 interface AuthPageProps {
