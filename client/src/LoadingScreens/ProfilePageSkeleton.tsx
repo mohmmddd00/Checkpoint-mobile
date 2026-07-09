@@ -1,32 +1,72 @@
-import { View, StyleSheet } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { View, StyleSheet, Animated } from "react-native";
 
-function Bone({ width = "100%" as any, height = 14, borderRadius = 6, style = {} as any }) {
+// ─── SHIMMER BONE ─────────────────────────────────────────────────────────────
+
+function Bone({
+  width = "100%" as any,
+  height = 14,
+  borderRadius = 6,
+  style = {} as any,
+}: {
+  width?: number | string;
+  height?: number;
+  style?: object;
+  borderRadius?: number;
+}) {
+  const shimmer = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmer, { toValue: 1, duration: 900, useNativeDriver: true }),
+        Animated.timing(shimmer, { toValue: 0, duration: 900, useNativeDriver: true }),
+      ])
+    ).start();
+  }, []);
+
+  const opacity = shimmer.interpolate({ inputRange: [0, 1], outputRange: [0.35, 0.7] });
+
   return (
-    <View style={[{ width, height, borderRadius, backgroundColor: "rgba(255,255,255,0.06)" }, style]} />
+    <Animated.View
+      style={[{ width, height, borderRadius, backgroundColor: "#380B14", opacity }, style]}
+    />
   );
 }
+
+// ─── HERO ────────────────────────────────────────────────────────────────────
 
 function HeroSkeleton() {
   return (
     <View style={s.heroBox}>
-      <View style={s.heroTop}>
+      {/* Avatar row */}
+      <View style={s.avatarRow}>
         <Bone width={72} height={72} borderRadius={36} />
-        <View style={{ flex: 1, gap: 8 }}>
-          <Bone width="55%" height={22} />
-          <Bone width="30%" height={13} />
-        </View>
+        <Bone width={80} height={30} borderRadius={8} />
       </View>
-      <View style={s.statsRow}>
-        {[0, 1, 2, 3].map((i) => (
-          <View key={i} style={s.statItem}>
-            <Bone width={32} height={20} style={{ marginBottom: 6 }} />
-            <Bone width={52} height={11} />
-          </View>
-        ))}
+
+      {/* Name + username + stats */}
+      <View>
+        <Bone width="55%" height={22} style={{ marginBottom: 10 }} />
+        <Bone width="30%" height={13} style={{ marginBottom: 20 }} />
+
+        <View style={s.statsRow}>
+          {[0, 1, 2, 3].map((i) => (
+            <React.Fragment key={i}>
+              <View style={s.statItem}>
+                <Bone width={32} height={20} style={{ marginBottom: 6 }} />
+                <Bone width={52} height={11} />
+              </View>
+              {i < 3 && <View style={s.statDivider} />}
+            </React.Fragment>
+          ))}
+        </View>
       </View>
     </View>
   );
 }
+
+// ─── SECTION HEADER ──────────────────────────────────────────────────────────
 
 function SectionHeaderSkeleton() {
   return (
@@ -36,12 +76,19 @@ function SectionHeaderSkeleton() {
   );
 }
 
+// ─── GAME CARDS ──────────────────────────────────────────────────────────────
+
 function GameCardsSkeleton({ count = 5 }: { count?: number }) {
   return (
     <View style={s.cardsRow}>
       {Array.from({ length: count }).map((_, i) => (
         <View key={i} style={s.cardItem}>
-          <Bone width="100%" height={130} borderRadius={8} />
+          <Bone
+            width="100%"
+            height={0}
+            borderRadius={8}
+            style={{ paddingBottom: "150%" }}
+          />
           <Bone width="80%" height={13} style={{ marginTop: 10, marginBottom: 6 }} />
           <Bone width={48} height={11} />
         </View>
@@ -49,6 +96,8 @@ function GameCardsSkeleton({ count = 5 }: { count?: number }) {
     </View>
   );
 }
+
+// ─── STATS ───────────────────────────────────────────────────────────────────
 
 function StatsSkeleton() {
   return (
@@ -58,7 +107,13 @@ function StatsSkeleton() {
           <Bone width={120} height={11} style={{ marginBottom: 20 }} />
           <View style={s.barRow}>
             {[60, 85, 40, 95, 55, 70].map((h, j) => (
-              <Bone key={j} width="100%" height={h * 0.8} borderRadius={3} />
+              <View key={j} style={s.barCol}>
+                <Bone
+                  width="100%"
+                  height={Math.round((h / 100) * 64)}
+                  borderRadius={3}
+                />
+              </View>
             ))}
           </View>
         </View>
@@ -66,6 +121,8 @@ function StatsSkeleton() {
     </View>
   );
 }
+
+// ─── REVIEW CARD ─────────────────────────────────────────────────────────────
 
 function ReviewCardSkeleton() {
   return (
@@ -81,6 +138,8 @@ function ReviewCardSkeleton() {
     </View>
   );
 }
+
+// ─── EXPORT ──────────────────────────────────────────────────────────────────
 
 export function ProfilePageSkeleton() {
   return (
@@ -112,11 +171,15 @@ export function ProfilePageSkeleton() {
   );
 }
 
+// ─── STYLES ──────────────────────────────────────────────────────────────────
+
 const s = StyleSheet.create({
   container: {
     padding: 16,
     paddingBottom: 60,
   },
+
+  // Hero
   heroBox: {
     backgroundColor: "#160408",
     borderWidth: 1,
@@ -124,20 +187,30 @@ const s = StyleSheet.create({
     borderRadius: 16,
     padding: 20,
     marginBottom: 36,
-    gap: 20,
-  },
-  heroTop: {
-    flexDirection: "row",
-    alignItems: "center",
     gap: 16,
   },
+  avatarRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+
+  // Stats row
   statsRow: {
     flexDirection: "row",
-    gap: 20,
+    alignItems: "center",
   },
   statItem: {
     flex: 1,
   },
+  statDivider: {
+    width: 1,
+    height: 36,
+    backgroundColor: "#28070F",
+    marginHorizontal: 8,
+  },
+
+  // Sections
   section: {
     marginBottom: 36,
   },
@@ -147,6 +220,8 @@ const s = StyleSheet.create({
     paddingBottom: 10,
     marginBottom: 20,
   },
+
+  // Game cards
   cardsRow: {
     flexDirection: "row",
     gap: 12,
@@ -155,6 +230,8 @@ const s = StyleSheet.create({
   cardItem: {
     width: "30%",
   },
+
+  // Stats boxes
   statsBoxRow: {
     gap: 12,
   },
@@ -171,6 +248,12 @@ const s = StyleSheet.create({
     gap: 6,
     height: 80,
   },
+  barCol: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+
+  // Review card
   reviewCard: {
     backgroundColor: "#160408",
     borderWidth: 1,
