@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -7,14 +7,13 @@ import {
   TouchableOpacity,
   Image,
   Dimensions,
+  Animated,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Animated } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { RootStackParamList } from "../../App";
 import { UpcomingGamesScreenSkeleton } from "../LoadingScreens/UpcomingGamesPageSkeleton";
-import { useFadeUp } from "../hooks/useFadeUp";
 import { DashboardLayout } from "../components/DashboardLayout";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -76,7 +75,8 @@ export function UpcomingGamesScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [filter, setFilter] = useState<"all" | "month" | "3months">("all");
-  const { opacity, translateY } = useFadeUp();
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(12)).current;
 
   useEffect(() => {
     const load = async () => {
@@ -92,6 +92,10 @@ export function UpcomingGamesScreen() {
         setError(true);
       } finally {
         setLoading(false);
+        Animated.parallel([
+          Animated.timing(opacity, { toValue: 1, duration: 350, useNativeDriver: true }),
+          Animated.timing(translateY, { toValue: 0, duration: 350, useNativeDriver: true }),
+        ]).start();
       }
     };
     load();
