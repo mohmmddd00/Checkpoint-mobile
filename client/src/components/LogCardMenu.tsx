@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { cpToast } from "../utils/toast";
+import { ModalToast } from "../components/ModalToast";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -60,6 +61,9 @@ function EditLogModal({
   const [rating, setRating] = useState(log.rating != null ? String(log.rating) : "");
   const [review, setReview] = useState(log.review || "");
   const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const showError = (msg: string) => setErrorMsg(msg);
 
   const hasChanges =
     platform !== (log.platform || "") ||
@@ -68,16 +72,16 @@ function EditLogModal({
     review !== (log.review || "");
 
   const handleSave = async () => {
-    if (!platform.trim()) { cpToast.error("Please select a platform."); return; }
-    if (!status) { cpToast.error("Please select a status."); return; }
-    if (rating.trim() === "") { cpToast.error("Please enter a rating."); return; }
-    if (!/^\d+(\.\d+)?$/.test(rating.trim())) { cpToast.error("Ratings can only be numeric."); return; }
+    if (!platform.trim()) { showError("Please select a platform."); return; }
+    if (!status) { showError("Please select a status."); return; }
+    if (rating.trim() === "") { showError("Please enter a rating."); return; }
+    if (!/^\d+(\.\d+)?$/.test(rating.trim())) { showError("Ratings can only be numeric."); return; }
     const numericRating = Number(rating);
     if (isNaN(numericRating) || numericRating < 1 || numericRating > 10) {
-      cpToast.error("Rating must be between 1 and 10."); return;
+      showError("Rating must be between 1 and 10."); return;
     }
     if (!/^\d+(\.\d)?$/.test(rating.trim())) {
-      cpToast.error("Rating can only have 1 decimal place (e.g. 7, 7.5, 9.1)."); return;
+      showError("Rating can only have 1 decimal place (e.g. 7, 7.5, 9.1)."); return;
     }
 
     setSubmitting(true);
@@ -97,10 +101,10 @@ function EditLogModal({
         onClose();
       } else {
         const data = await res.json().catch(() => ({}));
-        cpToast.error(data.message || "Failed to update log.");
+        showError(data.message || "Failed to update log.");
       }
     } catch {
-      cpToast.error("Could not reach the server. Try again.");
+      showError("Could not reach the server. Try again.");
     } finally {
       setSubmitting(false);
     }
@@ -108,6 +112,7 @@ function EditLogModal({
 
   return (
     <Modal visible animationType="fade" transparent onRequestClose={onClose}>
+      <ModalToast message={errorMsg} onHide={() => setErrorMsg(null)} />
       <Pressable style={m.backdrop} onPress={onClose}>
         <Pressable style={m.sheet} onPress={() => {}}>
           <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="always" keyboardDismissMode="none">
