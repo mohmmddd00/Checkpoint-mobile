@@ -251,7 +251,7 @@ export function AuthPage({ mode }: AuthPageProps) {
           {!isLogin && showEmailForm && (
             <TouchableOpacity
               onPress={() => navigation.navigate("Login")}
-              style={styles.switchBtn}
+              style={[styles.switchBtn, { marginTop: 28 }]}
             >
               <Text style={styles.switchBtnText}>Already have an account?</Text>
             </TouchableOpacity>
