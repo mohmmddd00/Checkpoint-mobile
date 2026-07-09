@@ -18,6 +18,7 @@ import Svg, { Circle, Line } from "react-native-svg";
 import { GameSearchResults } from "../components/GameSearchResults";
 import type { Game } from "../components/GameSearchResults";
 import { cpToast } from "../utils/toast";
+import { ModalToast } from "../components/ModalToast";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -119,22 +120,25 @@ function LogModal({
   const [rating, setRating] = useState("");
   const [review, setReview] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const showError = (msg: string) => setErrorMsg(msg);
 
   const handleSubmit = async () => {
-    if (!platform.trim()) { cpToast.error("Please select a platform."); return; }
-    if (!status) { cpToast.error("Please select a status."); return; }
-    if (rating.trim() === "") { cpToast.error("Please enter a rating."); return; }
+    if (!platform.trim()) { showError("Please select a platform."); return; }
+    if (!status) { showError("Please select a status."); return; }
+    if (rating.trim() === "") { showError("Please enter a rating."); return; }
     if (!/^\d+(\.\d+)?$/.test(rating.trim())) {
-      cpToast.error("Ratings can only be numeric.");
+      showError("Ratings can only be numeric.");
       return;
     }
     const numericRating = Number(rating);
     if (Number.isNaN(numericRating) || numericRating < 0 || numericRating > 10) {
-      cpToast.error("Rating must be between 0 and 10.");
+      showError("Rating must be between 0 and 10.");
       return;
     }
     if (!/^\d+(\.\d)?$/.test(rating.trim())) {
-      cpToast.error("Rating can only have 1 decimal place (e.g. 7, 7.5, 9.1).");
+      showError("Rating can only have 1 decimal place (e.g. 7, 7.5, 9.1).");
       return;
     }
 
@@ -164,10 +168,10 @@ function LogModal({
         cpToast.success(`${game.name} logged!`);
         onClose();
       } else {
-        cpToast.error(data.message || "Failed to log game.");
+        showError(data.message || "Failed to log game.");
       }
     } catch {
-      cpToast.error("Could not reach the server. Try again later.");
+      showError("Could not reach the server. Try again later.");
     } finally {
       setSubmitting(false);
     }
@@ -182,6 +186,8 @@ function LogModal({
 
   return (
     <Modal visible transparent animationType="fade" onRequestClose={handleClose}>
+      <ModalToast message={errorMsg} onHide={() => setErrorMsg(null)} />
+
       {/* Backdrop — tapping it closes the modal */}
       <Pressable style={styles.backdrop} onPress={handleClose}>
         <Pressable style={styles.modalCard} onPress={() => {}}>
