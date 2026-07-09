@@ -240,7 +240,7 @@ export function AuthPage({ mode }: AuthPageProps) {
               <GoogleAuthButton mode="login" />
               <TouchableOpacity
                 onPress={() => navigation.navigate("Register")}
-                style={[styles.switchBtn, { marginTop: 16 }]}
+                style={[styles.switchBtn, { marginTop: 28 }]}
               >
                 <Text style={styles.switchBtnText}>Need to register?</Text>
               </TouchableOpacity>
