@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Animated,
 } from "react-native";
+import Svg, { Circle, Line } from "react-native-svg";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DashboardLayout } from "../components/DashboardLayout";
 import { LogCardMenu } from "../components/LogCardMenu";
@@ -262,7 +263,19 @@ function LogsContent() {
 
             {/* Local search */}
             <View style={s.searchWrap}>
-              <Text style={s.searchIcon}>🔍</Text>
+              <Svg
+                width={16}
+                height={16}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="rgba(255,255,255,0.35)"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <Circle cx={11} cy={11} r={8} />
+                <Line x1={21} y1={21} x2={16.65} y2={16.65} />
+              </Svg>
               <TextInput
                 value={logSearch}
                 onChangeText={setLogSearch}
@@ -354,9 +367,6 @@ const s = StyleSheet.create({
     gap: 10,
     marginBottom: 28,
     maxWidth: 420,
-  },
-  searchIcon: {
-    fontSize: 13,
   },
   searchInput: {
     flex: 1,
