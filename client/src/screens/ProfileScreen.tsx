@@ -566,11 +566,11 @@ const s = StyleSheet.create({
   },
   statsRow: {
     flexDirection: "row",
-    position: "relative",
+    justifyContent: "space-evenly",
   },
   statCol: {
     flex: 1,
-    position: "relative",
+    alignItems: "center",
   },
   statValue: {
     color: "#F7F4F5",
@@ -588,8 +588,8 @@ const s = StyleSheet.create({
   statDivider: {
     position: "absolute",
     right: 0,
-    top: 0,
-    bottom: 0,
+    top: "10%",
+    bottom: "10%",
     width: 1,
     backgroundColor: "#28070F",
   },
