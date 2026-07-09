@@ -7,13 +7,13 @@ function Bone({ width, height, style }: { width?: any; height?: number; style?: 
   useEffect(() => {
     Animated.loop(
       Animated.sequence([
-        Animated.timing(shimmer, { toValue: 1, duration: 800, useNativeDriver: true }),
-        Animated.timing(shimmer, { toValue: 0, duration: 800, useNativeDriver: true }),
+        Animated.timing(shimmer, { toValue: 1, duration: 900, useNativeDriver: true }),
+        Animated.timing(shimmer, { toValue: 0, duration: 900, useNativeDriver: true }),
       ])
     ).start();
   }, []);
 
-  const opacity = shimmer.interpolate({ inputRange: [0, 1], outputRange: [0.04, 0.09] });
+  const opacity = shimmer.interpolate({ inputRange: [0, 1], outputRange: [0.35, 0.7] });
 
   return (
     <Animated.View
@@ -22,7 +22,7 @@ function Bone({ width, height, style }: { width?: any; height?: number; style?: 
           width: width || "100%",
           height: height || 16,
           borderRadius: 6,
-          backgroundColor: "#fff",
+          backgroundColor: "#380B14",
           opacity,
         },
         style,
