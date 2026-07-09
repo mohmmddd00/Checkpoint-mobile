@@ -403,11 +403,10 @@ function ProfileContent() {
                 { value: avgRating, label: "Avg Rating" },
                 { value: logs.filter((l) => l.status === "Completed").length, label: "Completed" },
                 { value: vaultCount, label: "Vaults" },
-              ].map(({ value, label }, i, arr) => (
+              ].map(({ value, label }) => (
                 <View key={label} style={s.statCol}>
                   <Text style={s.statValue}>{value}</Text>
                   <Text style={s.statLabel}>{label}</Text>
-                  {i < arr.length - 1 && <View style={s.statDivider} />}
                 </View>
               ))}
             </View>
@@ -566,11 +565,9 @@ const s = StyleSheet.create({
   },
   statsRow: {
     flexDirection: "row",
+    gap: 20,
   },
-  statCol: {
-    flex: 1,
-    paddingHorizontal: 10,
-  },
+  statCol: {},
   statValue: {
     color: "#F7F4F5",
     fontSize: 18,
@@ -583,14 +580,6 @@ const s = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.8,
     marginTop: 4,
-  },
-  statDivider: {
-    position: "absolute",
-    right: -1,
-    top: "15%",
-    bottom: "15%",
-    width: 1,
-    backgroundColor: "#28070F",
   },
 
   // Sections
