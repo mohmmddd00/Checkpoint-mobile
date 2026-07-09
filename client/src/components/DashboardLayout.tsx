@@ -11,7 +11,7 @@ import { storage } from "../utils/storage";
 import { routes } from "../navigation/routes";
 import type { RootStackParamList } from "../../App";
 import { GameSearchResults } from "./GameSearchResults";
-import Svg, { Path } from "react-native-svg";
+import Svg, { Path, Circle, Line } from "react-native-svg";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 const STATIC_BASE_URL = API_URL!.replace(/\/api\/?$/, "");
@@ -131,7 +131,19 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               onPress={() => setSearchOpen((v) => !v)}
               style={[styles.headerBtn, { marginRight: 4 }]}
             >
-              <Text style={[styles.headerIcon, searchOpen && { color: "#E6A1B0" }]}>🔍</Text>
+              <Svg
+                width={18}
+                height={18}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke={searchOpen ? "#E6A1B0" : "#A28389"}
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <Circle cx={11} cy={11} r={8} />
+                <Line x1={21} y1={21} x2={16.65} y2={16.65} />
+              </Svg>
             </TouchableOpacity>
 
             {/* Avatar */}
@@ -155,7 +167,19 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         {searchOpen && (
           <View style={styles.searchDropdownWrap}>
             <View style={styles.searchBar}>
-              <Text style={styles.searchIcon}>🔍</Text>
+              <Svg
+                width={16}
+                height={16}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="rgba(255,255,255,0.35)"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <Circle cx={11} cy={11} r={8} />
+                <Line x1={21} y1={21} x2={16.65} y2={16.65} />
+              </Svg>
               <TextInput
                 autoFocus
                 placeholder="Search for a game..."
@@ -514,9 +538,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     gap: 10,
     marginBottom: 6,
-  },
-  searchIcon: {
-    fontSize: 14,
   },
   searchInput: {
     flex: 1,
