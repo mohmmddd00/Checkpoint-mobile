@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
   },
   switchBtn: {
     alignSelf: "center",
-    marginTop: 16,
+    marginTop: 28,
     padding: 4,
   },
   switchBtnText: {
