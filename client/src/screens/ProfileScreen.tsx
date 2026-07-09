@@ -565,9 +565,10 @@ const s = StyleSheet.create({
   },
   statsRow: {
     flexDirection: "row",
-    gap: 20,
   },
-  statCol: {},
+  statCol: {
+    flex: 1,
+  },
   statValue: {
     color: "#F7F4F5",
     fontSize: 18,
