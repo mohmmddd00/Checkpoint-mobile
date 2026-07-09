@@ -6,8 +6,8 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  Alert,
 } from "react-native";
+import { DeleteConfirmMenu } from "../components/DeleteConfirmMenu";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../App";
@@ -177,36 +177,23 @@ function PublicVaultContent() {
     load();
   }, [id]);
 
-  const handleDelete = () => {
-    Alert.alert(
-      "Delete Vault",
-      "Are you sure you want to delete this vault?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            if (!vault) return;
-            try {
-              const token = await storage.getToken();
-              const res = await fetch(`${API_URL}/vaults/${vault._id}`, {
-                method: "DELETE",
-                headers: { Authorization: `Bearer ${token}` },
-              });
-              if (res.ok) {
-                cpToast.success("Vault deleted.");
-                navigation.navigate("CommunityReviews");
-              } else {
-                cpToast.error("Failed to delete vault.");
-              }
-            } catch {
-              cpToast.error("Failed to delete vault.");
-            }
-          },
-        },
-      ]
-    );
+  const handleDelete = async () => {
+    if (!vault) return;
+    try {
+      const token = await storage.getToken();
+      const res = await fetch(`${API_URL}/vaults/${vault._id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        cpToast.success("Vault deleted.");
+        navigation.navigate("CommunityReviews");
+      } else {
+        cpToast.error("Failed to delete vault.");
+      }
+    } catch {
+      cpToast.error("Failed to delete vault.");
+    }
   };
 
   if (loading) {
@@ -231,7 +218,7 @@ function PublicVaultLoaded({
 }: {
   vault: PublicVault;
   currentUserId: string | null;
-  onDelete: () => void;
+  onDelete: () => Promise<void>;
 }) {
   const navigation = useNavigation<Nav>();
   const { opacity, translateY } = useFadeUp();
@@ -266,9 +253,11 @@ function PublicVaultLoaded({
         </TouchableOpacity>
 
         {isOwner && (
-          <TouchableOpacity onPress={onDelete} style={styles.deleteBtn}>
-            <Text style={styles.deleteBtnText}>Delete</Text>
-          </TouchableOpacity>
+          <DeleteConfirmMenu
+            onDelete={onDelete}
+            onEdit={() => navigation.navigate("EditVault", { id: vault._id })}
+            confirmMessage="Are you sure you want to delete this vault?"
+          />
         )}
       </View>
 
