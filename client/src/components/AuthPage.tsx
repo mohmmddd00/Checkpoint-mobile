@@ -179,6 +179,8 @@ export function AuthPage({ mode }: AuthPageProps) {
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
+                returnKeyType={isLogin ? "go" : "next"}
+                onSubmitEditing={isLogin ? handleSubmit : undefined}
               />
 
               {isLogin && (
@@ -196,6 +198,8 @@ export function AuthPage({ mode }: AuthPageProps) {
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
                   secureTextEntry
+                  returnKeyType="go"
+                  onSubmitEditing={handleSubmit}
                 />
               )}
 
