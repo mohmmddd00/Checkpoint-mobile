@@ -75,7 +75,9 @@ export function AuthPage({ mode }: AuthPageProps) {
         });
         await storage.setToken(response.data.token);
         cpToast.success(`Welcome back, ${response.data.username || loginUsername}!`);
-        navigation.navigate("Home");
+        setLoginUsername("");
+        setPassword("");
+        navigation.reset({ index: 0, routes: [{ name: "Home" }] });
       } else {
         if (firstName.trim().length < 2) { setError("First name must be at least 2 characters."); setLoading(false); return; }
         if (/^-|-$/.test(firstName.trim())) { setError("First name cannot start or end with a hyphen."); setLoading(false); return; }
