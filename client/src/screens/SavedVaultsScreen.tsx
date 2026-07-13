@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 16,
-    paddingTop: 60,
+    paddingTop: 28,
     paddingBottom: 80,
   },
   backButton: {
