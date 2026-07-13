@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
   View, Text, ScrollView, Image, TouchableOpacity,
-  StyleSheet, ActivityIndicator, Animated,
+  StyleSheet, ActivityIndicator, Animated, Modal, TouchableWithoutFeedback,
 } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -11,6 +11,7 @@ import { ProfilePageSkeleton } from "../LoadingScreens/ProfilePageSkeleton";
 import { EditedTag } from "../components/EditedTag";
 import { SavedVaultsButton } from "../components/SavedVaultsButton";
 import { storage } from "../utils/storage";
+import { usePfpExpandAnimation } from "../hooks/usePfpExpandAnimation";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 const STATIC_BASE_URL = API_URL!.replace(/\/api\/?$/, "");
@@ -296,6 +297,7 @@ function ProfileContent() {
   const [loading, setLoading] = useState(true);
   const opacity = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(12)).current;
+  const { isOpen: pfpOpen, open: openPfp, close: closePfp, overlayOpacity, imageScale } = usePfpExpandAnimation();
 
   const load = useCallback(async () => {
     const token = await storage.getToken();
@@ -372,9 +374,11 @@ function ProfileContent() {
   const avatarUrl = resolveAvatarUrl(profile?.profileImage);
 
   return (
+    <>
     <Animated.ScrollView
       style={[s.container, { opacity, transform: [{ translateY }] }]}
       contentContainerStyle={s.content}
+      scrollEnabled={!pfpOpen}
     >
 
       {/* ── HERO ── */}
@@ -382,13 +386,13 @@ function ProfileContent() {
         <View style={s.heroTop}>
           {/* Avatar + SavedVaultsButton row on mobile */}
           <View style={s.avatarRow}>
-            <View style={s.avatar}>
+            <TouchableOpacity onPress={openPfp} activeOpacity={0.85} style={s.avatar}>
               {avatarUrl ? (
                 <Image source={{ uri: avatarUrl }} style={StyleSheet.absoluteFill} resizeMode="cover" />
               ) : (
                 <Text style={s.avatarInitials}>{initials}</Text>
               )}
-            </View>
+            </TouchableOpacity>
             <SavedVaultsButton />
           </View>
 
@@ -499,6 +503,25 @@ function ProfileContent() {
       </View>
 
     </Animated.ScrollView>
+
+    <Modal visible={pfpOpen} transparent animationType="none" onRequestClose={closePfp} statusBarTranslucent>
+      <TouchableWithoutFeedback onPress={closePfp}>
+        <Animated.View style={[s.pfpOverlay, { opacity: overlayOpacity }]}>
+          <TouchableWithoutFeedback>
+            <Animated.View style={{ transform: [{ scale: imageScale }] }}>
+              {avatarUrl ? (
+                <Image source={{ uri: avatarUrl }} style={s.pfpExpandedImage} resizeMode="cover" />
+              ) : (
+                <View style={s.pfpExpandedInitials}>
+                  <Text style={s.pfpExpandedInitialsText}>{initials}</Text>
+                </View>
+              )}
+            </Animated.View>
+          </TouchableWithoutFeedback>
+        </Animated.View>
+      </TouchableWithoutFeedback>
+    </Modal>
+    </>
   );
 }
 
@@ -829,5 +852,35 @@ const s = StyleSheet.create({
     fontWeight: "700",
     letterSpacing: 1,
     textTransform: "uppercase",
+  },
+
+  // Pfp expand overlay
+  pfpOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.88)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  pfpExpandedImage: {
+    width: 270,
+    height: 270,
+    borderRadius: 135,
+    borderWidth: 3,
+    borderColor: "#9E1B32",
+  },
+  pfpExpandedInitials: {
+    width: 270,
+    height: 270,
+    borderRadius: 135,
+    backgroundColor: "#9E1B32",
+    borderWidth: 3,
+    borderColor: "#380B14",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  pfpExpandedInitialsText: {
+    color: "#F7F4F5",
+    fontSize: 88,
+    fontWeight: "800",
   },
 });
