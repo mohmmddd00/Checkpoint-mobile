@@ -1,4 +1,4 @@
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, DarkTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { LoginScreen } from "./src/screens/LoginScreen";
 import Toast from "react-native-toast-message";
@@ -68,10 +68,10 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 export default function App() {
   return (
     <>
-    <NavigationContainer>
+    <NavigationContainer theme={{ ...DarkTheme, colors: { ...DarkTheme.colors, background: '#0d0d0d', card: '#0d0d0d', text: '#ffffff', border: 'transparent', primary: '#e5383b', notification: '#e5383b' } }}>
       <Stack.Navigator
         initialRouteName="Login"
-        screenOptions={{ headerShown: false, animation: "none" }}
+        screenOptions={{ headerShown: false, animation: "none", contentStyle: { backgroundColor: '#0d0d0d' } }}
       >
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
