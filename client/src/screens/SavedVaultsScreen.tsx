@@ -280,7 +280,7 @@ function EmptyState() {
         Browse the community and hit the floppy disk on any vault to save it here.
       </Text>
       <TouchableOpacity
-        onPress={() => navigation.navigate("CommunityVaults")}
+        onPress={() => navigation.navigate("CommunityReviews", { initialTab: "vaults" })}
         style={styles.emptyLink}
       >
         <Text style={styles.emptyLinkText}>Browse community vaults →</Text>

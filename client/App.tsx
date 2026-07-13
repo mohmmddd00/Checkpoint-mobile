@@ -41,7 +41,7 @@ export type RootStackParamList = {
   ResetPassword: { token: string };
   Profile: undefined;
   Logs: undefined;
-  CommunityReviews: undefined;
+  CommunityReviews: { initialTab?: "reviews" | "vaults" } | undefined;
   UpcomingGames: undefined;
   HallOfFame: undefined;
   About: undefined;

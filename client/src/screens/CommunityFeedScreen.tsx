@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Animated,
 } from "react-native";
+import { useRoute } from "@react-navigation/native";
 import { DashboardLayout } from "../components/DashboardLayout";
 import { CommunityReviewsFeed } from "./CommunityReviewsScreen";
 import { CommunityVaultsFeed } from "./CommunityVaultsScreen";
@@ -70,7 +71,10 @@ function CommunityToggle({
 // ─── SCREEN CONTENT ───────────────────────────────────────────────────────────
 
 function CommunityFeedContent() {
-  const [activeTab, setActiveTab] = useState<"reviews" | "vaults">("reviews");
+  const route = useRoute<any>();
+  const [activeTab, setActiveTab] = useState<"reviews" | "vaults">(
+    route.params?.initialTab ?? "reviews"
+  );
 
   return (
     <ScrollView
