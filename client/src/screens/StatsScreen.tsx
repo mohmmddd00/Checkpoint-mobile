@@ -420,8 +420,8 @@ function StatsContent() {
       showsVerticalScrollIndicator={false}
     >
       {/* Back */}
-      <TouchableOpacity onPress={() => navigation.navigate("Profile")} style={s.backBtn}>
-        <Text style={s.backText}>← Back to profile</Text>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={s.backBtn}>
+        <Text style={s.backText}>← Back</Text>
       </TouchableOpacity>
 
       {/* Header */}
