@@ -117,7 +117,7 @@ function ReviewsContent({ reviews }: { reviews: GameLog[] }) {
               onPress={() => navigation.goBack()}
               style={s.backBtn}
             >
-              <Text style={s.backBtnText}>← Back to profile</Text>
+              <Text style={s.backBtnText}>← Back</Text>
             </TouchableOpacity>
             <Text style={s.heading}>All your reviews</Text>
             <Text style={s.subheading}>
