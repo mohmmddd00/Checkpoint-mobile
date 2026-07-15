@@ -11,6 +11,7 @@ import { storage } from "../utils/storage";
 import { routes } from "../navigation/routes";
 import type { RootStackParamList } from "../../App";
 import { GameSearchResults } from "./GameSearchResults";
+import { useQuicklogButtonAnimation } from "../hooks/useQuicklogButtonAnimation";
 import Svg, { Path, Circle, Line } from "react-native-svg";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -87,6 +88,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   const currentRoute = route.name;
+  const isQuickLogActive = currentRoute === "QuickLog";
+  const { iconAnimStyle } = useQuicklogButtonAnimation(isQuickLogActive);
 
   const handleSelectGame = (game: any) => {
     const slug = game.name
@@ -346,9 +349,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 }
               }}
             >
-              <Text style={[styles.quickLogIcon, currentRoute === "QuickLog" && styles.quickLogIconActive]}>
-                {currentRoute === "QuickLog" ? "✕" : "+"}
-              </Text>
+              <Animated.View style={iconAnimStyle}>
+                <Text style={[styles.quickLogIcon, currentRoute === "QuickLog" && styles.quickLogIconActive]}>
+                  {currentRoute === "QuickLog" ? "✕" : "+"}
+                </Text>
+              </Animated.View>
             </TouchableOpacity>
           </View>
           <TabItem
