@@ -33,7 +33,7 @@ export function MyVaultsPageSkeleton() {
   return (
     <View style={s.container}>
       {/* Back button */}
-      <Bone width={120} height={13} borderRadius={4} style={{ marginBottom: 24 }} />
+      <Bone width={60} height={13} borderRadius={4} style={{ marginBottom: 24 }} />
 
       {/* Header row: title + new vault button */}
       <View style={s.headerRow}>
