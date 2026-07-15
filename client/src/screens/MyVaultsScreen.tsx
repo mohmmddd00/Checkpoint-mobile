@@ -200,10 +200,10 @@ function MyVaultsLoaded({ vaults, setVaults }: { vaults: Vault[]; setVaults: Rea
     >
       {/* Back */}
       <TouchableOpacity
-        onPress={() => navigation.navigate("Profile")}
+        onPress={() => navigation.goBack()}
         style={s.backButton}
       >
-        <Text style={s.backText}>← Back to profile</Text>
+        <Text style={s.backText}>← Back</Text>
       </TouchableOpacity>
 
       {/* Header */}
