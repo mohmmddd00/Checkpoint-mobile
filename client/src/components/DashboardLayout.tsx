@@ -84,7 +84,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const handleLogout = async () => {
     await storage.removeToken();
-    navigation.navigate("Login");
+    navigation.reset({ index: 0, routes: [{ name: "Login" }] });
   };
 
   const currentRoute = route.name;
