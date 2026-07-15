@@ -317,7 +317,6 @@ const styles = StyleSheet.create({
   },
   forgotBtn: {
     alignSelf: "flex-end",
-    marginTop: -4,
   },
   forgotText: {
     color: "rgba(255,255,255,0.45)",
