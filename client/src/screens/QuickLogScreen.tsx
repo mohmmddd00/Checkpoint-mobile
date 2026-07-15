@@ -240,7 +240,7 @@ function LogModal({
                     platformOpen && styles.dropdownTriggerOpen,
                     !!platform && styles.dropdownTriggerSelected,
                   ]}
-                  onPress={() => { setPlatformOpen(!platformOpen); setStatusOpen(false); }}
+                  onPress={() => { Keyboard.dismiss(); setPlatformOpen(!platformOpen); setStatusOpen(false); }}
                   activeOpacity={0.8}
                 >
                   <Text style={[styles.dropdownTriggerText, !platform && styles.dropdownPlaceholder]}>
@@ -281,7 +281,7 @@ function LogModal({
                     statusOpen && styles.dropdownTriggerOpen,
                     !!status && styles.dropdownTriggerSelected,
                   ]}
-                  onPress={() => { setStatusOpen(!statusOpen); setPlatformOpen(false); }}
+                  onPress={() => { Keyboard.dismiss(); setStatusOpen(!statusOpen); setPlatformOpen(false); }}
                   activeOpacity={0.8}
                 >
                   <Text style={[styles.dropdownTriggerText, !status && styles.dropdownPlaceholder]}>
