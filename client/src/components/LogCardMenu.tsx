@@ -146,7 +146,7 @@ function EditLogModal({
               <Text style={m.label}>Platform</Text>
               <TouchableOpacity
                 style={[m.dropdownTrigger, platformOpen && m.dropdownTriggerOpen, platform && m.dropdownTriggerSelected]}
-                onPress={() => { setPlatformOpen((v) => !v); setStatusOpen(false); }}
+                onPress={() => { Keyboard.dismiss(); setPlatformOpen((v) => !v); setStatusOpen(false); }}
               >
                 <Text style={platform ? m.dropdownValueSelected : m.dropdownPlaceholder}>
                   {platform || "Select platform"}
@@ -175,7 +175,7 @@ function EditLogModal({
               <Text style={m.label}>Status</Text>
               <TouchableOpacity
                 style={[m.dropdownTrigger, statusOpen && m.dropdownTriggerOpen, status && m.dropdownTriggerSelected]}
-                onPress={() => { setStatusOpen((v) => !v); setPlatformOpen(false); }}
+                onPress={() => { Keyboard.dismiss(); setStatusOpen((v) => !v); setPlatformOpen(false); }}
               >
                 <Text style={status ? m.dropdownValueSelected : m.dropdownPlaceholder}>
                   {status || "Select status"}
