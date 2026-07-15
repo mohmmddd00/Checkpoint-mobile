@@ -57,7 +57,7 @@ export function EditVaultScreenSkeleton() {
       showsVerticalScrollIndicator={false}
     >
       {/* Back button */}
-      <Bone width={120} height={13} style={{ marginBottom: 28, borderRadius: 4 }} />
+      <Bone width={60} height={13} style={{ marginBottom: 28, borderRadius: 4 }} />
 
       {/* Form card */}
       <View style={styles.card}>
