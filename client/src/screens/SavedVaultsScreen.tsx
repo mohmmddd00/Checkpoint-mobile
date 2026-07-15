@@ -345,10 +345,10 @@ function SavedVaultsLoaded({
       >
         {/* ── BACK ── */}
         <TouchableOpacity
-          onPress={() => navigation.navigate("Profile")}
+          onPress={() => navigation.goBack()}
           style={styles.backButton}
         >
-          <Text style={styles.backText}>← Back to profile</Text>
+          <Text style={styles.backText}>← Back</Text>
         </TouchableOpacity>
 
         {/* ── HEADER ── */}
