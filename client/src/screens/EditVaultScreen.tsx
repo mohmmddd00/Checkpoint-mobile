@@ -164,7 +164,7 @@ export function EditVaultScreen() {
       >
         {/* Back */}
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={styles.backText}>← Back to Vault</Text>
+          <Text style={styles.backText}>← Back</Text>
         </TouchableOpacity>
 
         {/* Card */}
