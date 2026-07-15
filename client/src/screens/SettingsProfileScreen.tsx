@@ -53,7 +53,7 @@ function AvatarUpload({
   initials: string;
 }) {
   const handlePress = () => {
-    Alert.alert("Profile Picture", "Choose an option", [
+    const buttons: any[] = [
       {
         text: "Select from Photos",
         onPress: async () => {
@@ -73,13 +73,12 @@ function AvatarUpload({
           }
         },
       },
-      {
-        text: "Remove Profile Picture",
-        style: "destructive",
-        onPress: onRemove,
-      },
-      { text: "Cancel", style: "cancel" },
-    ]);
+      ...(preview
+        ? [{ text: "Remove Profile Picture", style: "destructive" as const, onPress: onRemove }]
+        : []),
+      { text: "Cancel", style: "cancel" as const },
+    ];
+    Alert.alert("Profile Picture", "Choose an option", buttons);
   };
 
   return (
