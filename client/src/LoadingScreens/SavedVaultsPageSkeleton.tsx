@@ -54,7 +54,7 @@ export function SavedVaultsPageSkeleton() {
   return (
     <View style={styles.container}>
       {/* Back button */}
-      <Bone width={130} height={13} borderRadius={4} style={{ marginBottom: 24 }} />
+      <Bone width={60} height={13} borderRadius={4} style={{ marginBottom: 24 }} />
 
       {/* Page title + subtitle */}
       <View style={{ marginBottom: 20, gap: 8 }}>
