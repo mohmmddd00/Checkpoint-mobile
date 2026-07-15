@@ -87,7 +87,7 @@ export function AllUserReviewsSkeleton() {
   return (
     <ScrollView style={s.root} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         {/* Back button */}
-        <Bone width={120} height={13} style={{ marginBottom: 24, borderRadius: 4 }} />
+        <Bone width={60} height={13} style={{ marginBottom: 24, borderRadius: 4 }} />
 
         {/* Header */}
         <Bone width={160} height={20} style={{ marginBottom: 10 }} />
