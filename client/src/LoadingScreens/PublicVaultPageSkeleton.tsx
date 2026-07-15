@@ -19,7 +19,7 @@ export function PublicVaultPageSkeleton() {
     <View style={styles.container}>
       {/* Back + actions row */}
       <View style={styles.topRow}>
-        <Bone width={140} height={13} borderRadius={4} />
+        <Bone width={60} height={13} borderRadius={4} />
         <Bone width={28} height={28} borderRadius={8} />
       </View>
 
