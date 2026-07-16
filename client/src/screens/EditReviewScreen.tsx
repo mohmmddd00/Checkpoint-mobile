@@ -86,7 +86,7 @@ export function EditReviewScreen() {
       });
       if (res.ok) {
         cpToast.success("Changes saved.");
-        navigation.goBack();
+        navigation.navigate("CommunityReviews", { editedAt: Date.now() });
       } else {
         cpToast.error("Failed to save changes.");
       }

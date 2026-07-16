@@ -7,7 +7,7 @@ import {
   StyleSheet,
   Animated,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../App";
 import { ReviewEngagement } from "../components/ReviewEngagement";
@@ -198,30 +198,38 @@ function CommunityReviewCard({
 
 export function CommunityReviewsFeed() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const route = useRoute();
   const [reviews, setReviews] = useState<CommunityReview[]>([]);
   const [loading, setLoading] = useState(true);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const translateAnim = useRef(new Animated.Value(16)).current;
   const [resolvedUserId, setResolvedUserId] = useState<string | null>(null);
 
+  const loadReviews = async () => {
+    try {
+      const token = await storage.getToken();
+      const res = await fetch(`${API_URL}/gamelogs/public`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return;
+      const logsData = await res.json();
+      setReviews(logsData.filter((r: any) => r.user != null));
+    } catch (err) {
+      console.error("Failed to load community reviews:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const load = async () => {
-      try {
-        const token = await storage.getToken();
-        const res = await fetch(`${API_URL}/gamelogs/public`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) return;
-        const logsData = await res.json();
-        setReviews(logsData.filter((r: any) => r.user != null));
-      } catch (err) {
-        console.error("Failed to load community reviews:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
+    loadReviews();
   }, []);
+
+  useEffect(() => {
+    if ((route.params as any)?.editedAt) {
+      loadReviews();
+    }
+  }, [(route.params as any)?.editedAt]);
 
   useEffect(() => {
     if (!loading) {
