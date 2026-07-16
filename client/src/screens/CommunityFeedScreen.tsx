@@ -78,11 +78,15 @@ function CommunityFeedContent() {
   );
   const [refreshing, setRefreshing] = useState(false);
   const [vaultRefreshKey, setVaultRefreshKey] = useState(0);
+  const [reviewRefreshKey, setReviewRefreshKey] = useState(0);
 
   const handleRefresh = async () => {
-    if (activeTab !== "vaults") return;
     setRefreshing(true);
-    setVaultRefreshKey((k) => k + 1);
+    if (activeTab === "vaults") {
+      setVaultRefreshKey((k) => k + 1);
+    } else {
+      setReviewRefreshKey((k) => k + 1);
+    }
     setTimeout(() => setRefreshing(false), 800);
   };
 
@@ -93,14 +97,12 @@ function CommunityFeedContent() {
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
       refreshControl={
-        activeTab === "vaults" ? (
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor="#9E1B32"
-            colors={["#9E1B32"]}
-          />
-        ) : undefined
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          tintColor="#9E1B32"
+          colors={["#9E1B32"]}
+        />
       }
     >
       {/* ── HEADER (never moves) ── */}
@@ -115,7 +117,7 @@ function CommunityFeedContent() {
 
       {/* ── SWAPPED FEED ── */}
       {activeTab === "reviews" ? (
-        <CommunityReviewsFeed />
+        <CommunityReviewsFeed refreshKey={reviewRefreshKey} />
       ) : (
         <CommunityVaultsFeed refreshKey={vaultRefreshKey} />
       )}

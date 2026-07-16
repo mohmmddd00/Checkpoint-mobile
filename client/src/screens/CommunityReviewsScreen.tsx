@@ -196,7 +196,7 @@ function CommunityReviewCard({
 
 // ─── FEED (exported) ──────────────────────────────────────────────────────────
 
-export function CommunityReviewsFeed() {
+export function CommunityReviewsFeed({ refreshKey }: { refreshKey?: number }) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute();
   const [reviews, setReviews] = useState<CommunityReview[]>([]);
@@ -223,7 +223,7 @@ export function CommunityReviewsFeed() {
 
   useEffect(() => {
     loadReviews();
-  }, []);
+  }, [refreshKey]);
 
   useEffect(() => {
     if ((route.params as any)?.editedAt) {
