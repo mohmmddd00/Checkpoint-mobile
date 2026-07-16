@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { DeleteConfirmMenu } from "../components/DeleteConfirmMenu";
-import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import { useNavigation, useRoute, RouteProp, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../App";
 import { DashboardLayout } from "../components/DashboardLayout";
@@ -160,22 +160,24 @@ function PublicVaultContent() {
     load();
   }, []);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const token = await storage.getToken();
-        const res = await fetch(`${API_URL}/vaults/public/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) setVault(await res.json());
-      } catch (err) {
-        console.error("Failed to load vault:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [id]);
+  useFocusEffect(
+    useCallback(() => {
+      const load = async () => {
+        try {
+          const token = await storage.getToken();
+          const res = await fetch(`${API_URL}/vaults/public/${id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.ok) setVault(await res.json());
+        } catch (err) {
+          console.error("Failed to load vault:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      load();
+    }, [id])
+  );
 
   const handleDelete = async () => {
     if (!vault) return;
