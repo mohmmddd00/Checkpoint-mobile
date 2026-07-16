@@ -14,7 +14,7 @@ export function RegisterMethodPicker({ onEmailSelect, onSwitchToLogin }: Registe
         style={styles.emailButton}
         activeOpacity={0.7}
       >
-        <Text style={styles.emailButtonText}>Register with email</Text>
+        <Text style={styles.emailButtonText}>Continue with email</Text>
       </TouchableOpacity>
 
       <View style={styles.divider}>
