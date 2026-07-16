@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  Keyboard,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useNavigation } from "@react-navigation/native";
@@ -64,6 +65,7 @@ export function AuthPage({ mode }: AuthPageProps) {
   };
 
   const handleSubmit = async () => {
+    Keyboard.dismiss();
     setError("");
     setLoading(true);
 
