@@ -206,7 +206,7 @@ function CommunityVaultCard({
 
 // ─── FEED (exported) ──────────────────────────────────────────────────────────
 
-export function CommunityVaultsFeed() {
+export function CommunityVaultsFeed({ refreshKey }: { refreshKey?: number }) {
   const [vaults, setVaults] = useState<CommunityVault[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -240,7 +240,7 @@ export function CommunityVaultsFeed() {
       }
     };
     load();
-  }, []);
+  }, [refreshKey]);
 
   useEffect(() => {
     if (!loading) {

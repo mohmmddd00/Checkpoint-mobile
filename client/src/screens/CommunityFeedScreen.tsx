@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Animated,
+  RefreshControl,
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { DashboardLayout } from "../components/DashboardLayout";
@@ -75,6 +76,15 @@ function CommunityFeedContent() {
   const [activeTab, setActiveTab] = useState<"reviews" | "vaults">(
     route.params?.initialTab ?? "reviews"
   );
+  const [refreshing, setRefreshing] = useState(false);
+  const [vaultRefreshKey, setVaultRefreshKey] = useState(0);
+
+  const handleRefresh = async () => {
+    if (activeTab !== "vaults") return;
+    setRefreshing(true);
+    setVaultRefreshKey((k) => k + 1);
+    setTimeout(() => setRefreshing(false), 800);
+  };
 
   return (
     <ScrollView
@@ -82,6 +92,16 @@ function CommunityFeedContent() {
       contentContainerStyle={s.scrollContent}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
+      refreshControl={
+        activeTab === "vaults" ? (
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor="#9E1B32"
+            colors={["#9E1B32"]}
+          />
+        ) : undefined
+      }
     >
       {/* ── HEADER (never moves) ── */}
       <Text style={s.pageTitle}>Community Feed</Text>
@@ -94,7 +114,11 @@ function CommunityFeedContent() {
       <View style={s.divider} />
 
       {/* ── SWAPPED FEED ── */}
-      {activeTab === "reviews" ? <CommunityReviewsFeed /> : <CommunityVaultsFeed />}
+      {activeTab === "reviews" ? (
+        <CommunityReviewsFeed />
+      ) : (
+        <CommunityVaultsFeed refreshKey={vaultRefreshKey} />
+      )}
     </ScrollView>
   );
 }
