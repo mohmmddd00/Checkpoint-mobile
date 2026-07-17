@@ -17,6 +17,13 @@ import Svg, { Path, Circle, Line } from "react-native-svg";
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 const STATIC_BASE_URL = API_URL!.replace(/\/api\/?$/, "");
 
+let userInfoCache: {
+  firstName: string;
+  lastName: string;
+  username: string;
+  profileImage: string | null;
+} | null = null;
+
 function resolveAvatarUrl(path: string | null | undefined): string | null {
   if (!path) return null;
   if (path.startsWith("http") || path.startsWith("blob:")) return path;
@@ -49,7 +56,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     lastName: string;
     username: string;
     profileImage: string | null;
-  } | null>(null);
+  } | null>(userInfoCache);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -61,12 +68,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         });
         if (!res.ok) return;
         const data = await res.json();
-        setUserInfo({
+        const resolved = {
           firstName: data.firstName || "",
           lastName: data.lastName || "",
           username: data.username || "",
           profileImage: resolveAvatarUrl(data.profileImage),
-        });
+        };
+        userInfoCache = resolved;
+        setUserInfo(resolved);
       } catch (err) {
         console.error("Failed to load user info:", err);
       }
