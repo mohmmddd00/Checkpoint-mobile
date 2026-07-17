@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -100,45 +100,81 @@ function ReviewCard({ log }: { log: GameLog }) {
 
 // ─── SCREEN ───────────────────────────────────────────────────────────────────
 
-function ReviewsContent({ reviews }: { reviews: GameLog[] }) {
+const PAGE_LIMIT = 10;
+
+function ReviewsContent({
+  reviews,
+  totalReviews,
+  loadingMore,
+  hasMore,
+  spinAnim,
+  onEndReached,
+}: {
+  reviews: GameLog[];
+  totalReviews: number;
+  loadingMore: boolean;
+  hasMore: boolean;
+  spinAnim: Animated.Value;
+  onEndReached: () => void;
+}) {
   const navigation = useNavigation<Nav>();
   const { opacity, translateY } = useFadeUp();
 
   return (
     <View style={s.root}>
-    <Animated.View style={[{ opacity, transform: [{ translateY }] }, { flex: 1 }]}>
-      <FlatList
-        data={reviews}
-        keyExtractor={(item) => item._id}
-        contentContainerStyle={s.listContent}
-        ListHeaderComponent={
-          <>
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              style={s.backBtn}
-            >
-              <Text style={s.backBtnText}>← Back</Text>
-            </TouchableOpacity>
-            <Text style={s.heading}>All your reviews</Text>
-            <Text style={s.subheading}>
-              {reviews.length === 0
-                ? "You haven't written any reviews yet."
-                : `${reviews.length} review${reviews.length === 1 ? "" : "s"}`}
-            </Text>
-            <View style={s.divider} />
-          </>
-        }
-        ListEmptyComponent={
-          <View style={s.emptyWrap}>
-            <Text style={s.emptyText}>
-              Head over to your logs and add a review to a game.
-            </Text>
-          </View>
-        }
-        renderItem={({ item }) => <ReviewCard log={item} />}
-        ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
-      />
-    </Animated.View>
+      <Animated.View style={[{ opacity, transform: [{ translateY }] }, { flex: 1 }]}>
+        <FlatList
+          data={reviews}
+          keyExtractor={(item) => item._id}
+          contentContainerStyle={s.listContent}
+          ListHeaderComponent={
+            <>
+              <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                style={s.backBtn}
+              >
+                <Text style={s.backBtnText}>← Back</Text>
+              </TouchableOpacity>
+              <Text style={s.heading}>All your reviews</Text>
+              <Text style={s.subheading}>
+                {totalReviews === 0
+                  ? "You haven't written any reviews yet."
+                  : `${totalReviews} review${totalReviews === 1 ? "" : "s"}`}
+              </Text>
+              <View style={s.divider} />
+            </>
+          }
+          ListEmptyComponent={
+            <View style={s.emptyWrap}>
+              <Text style={s.emptyText}>
+                Head over to your logs and add a review to a game.
+              </Text>
+            </View>
+          }
+          renderItem={({ item }) => <ReviewCard log={item} />}
+          ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
+          onEndReached={onEndReached}
+          onEndReachedThreshold={0.3}
+          ListFooterComponent={
+            loadingMore ? (
+              <View style={s.spinnerWrap}>
+                <Animated.View
+                  style={[s.spinner, {
+                    transform: [{
+                      rotate: spinAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ["0deg", "360deg"],
+                      }),
+                    }],
+                  }]}
+                />
+              </View>
+            ) : !hasMore && reviews.length > 0 ? (
+              <Text style={s.endText}>All {totalReviews} reviews loaded</Text>
+            ) : null
+          }
+        />
+      </Animated.View>
     </View>
   );
 }
@@ -146,44 +182,73 @@ function ReviewsContent({ reviews }: { reviews: GameLog[] }) {
 export function AllUserReviewsScreen() {
   const [reviews, setReviews] = useState<GameLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [totalReviews, setTotalReviews] = useState(0);
+  const isFetchingRef = useRef(false);
+  const spinAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const token = await AsyncStorage.getItem("token");
-        const res = await fetch(`${API_URL}/gamelogs`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) return;
+    const loop = Animated.loop(
+      Animated.timing(spinAnim, { toValue: 1, duration: 750, useNativeDriver: true })
+    );
+    if (loadingMore) loop.start();
+    else { loop.stop(); spinAnim.setValue(0); }
+    return () => loop.stop();
+  }, [loadingMore]);
 
-        const logsData: GameLog[] = await res.json();
+  const fetchPage = async (pageNum: number, isFirst: boolean) => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+    if (isFirst) setLoading(true); else setLoadingMore(true);
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const res = await fetch(
+        `${API_URL}/gamelogs/my-reviews/paginated?page=${pageNum}&limit=${PAGE_LIMIT}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!res.ok) return;
+      const data = await res.json();
+      const formatted = data.reviews.map((log: any) => ({
+        ...log,
+        coverImage: log.coverImage || null,
+        releasedDate: log.releasedDate || null,
+      }));
+      setReviews((prev) => isFirst ? formatted : [...prev, ...formatted]);
+      setHasMore(data.hasMore);
+      setTotalReviews(data.total);
+      setPage(pageNum);
+    } catch (err) {
+      console.error("Failed to load reviews:", err);
+    } finally {
+      if (isFirst) setLoading(false); else setLoadingMore(false);
+      isFetchingRef.current = false;
+    }
+  };
 
-        const reviewed = [...logsData]
-          .filter((l) => l.review && l.review.trim().length > 0)
-          .sort(
-            (a, b) =>
-              new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-          )
-          .map((log: any) => ({
-            ...log,
-            coverImage: log.coverImage || null,
-            releasedDate: log.releasedDate || null,
-          }));
-
-        setReviews(reviewed);
-      } catch (err) {
-        console.error("Failed to load reviews:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    load();
+  useEffect(() => {
+    fetchPage(1, true);
   }, []);
+
+  const handleEndReached = () => {
+    if (hasMore && !loadingMore && !loading) fetchPage(page + 1, false);
+  };
 
   return (
     <DashboardLayout>
-      {loading ? <AllUserReviewsSkeleton /> : <ReviewsContent reviews={reviews} />}
+      {loading ? (
+        <AllUserReviewsSkeleton />
+      ) : (
+        <ReviewsContent
+          reviews={reviews}
+          totalReviews={totalReviews}
+          loadingMore={loadingMore}
+          hasMore={hasMore}
+          spinAnim={spinAnim}
+          onEndReached={handleEndReached}
+        />
+      )}
     </DashboardLayout>
   );
 }
@@ -335,5 +400,23 @@ const s = StyleSheet.create({
     fontSize: 13,
     lineHeight: 20,
     marginTop: 12,
+  },
+  spinnerWrap: {
+    alignItems: "center",
+    paddingVertical: 32,
+  },
+  spinner: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 3,
+    borderColor: "rgba(158,27,50,0.2)",
+    borderTopColor: "#9E1B32",
+  },
+  endText: {
+    textAlign: "center",
+    color: "#8A6D73",
+    fontSize: 12,
+    paddingVertical: 24,
   },
 });
