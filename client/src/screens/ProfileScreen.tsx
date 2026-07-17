@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
-  View, Text, ScrollView, Image, TouchableOpacity,
+  View, Text, ScrollView, TouchableOpacity,
   StyleSheet, ActivityIndicator, Animated, Modal, TouchableWithoutFeedback,
 } from "react-native";
+import { Image } from "expo-image";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../App";
@@ -388,7 +389,12 @@ function ProfileContent() {
           <View style={s.avatarRow}>
             <TouchableOpacity onPress={openPfp} activeOpacity={0.85} style={s.avatar}>
               {avatarUrl ? (
-                <Image source={{ uri: avatarUrl }} style={StyleSheet.absoluteFill} resizeMode="cover" />
+                <Image
+                  source={{ uri: avatarUrl }}
+                  style={StyleSheet.absoluteFill}
+                  cachePolicy="memory-disk"
+                  contentFit="cover"
+                />
               ) : (
                 <Text style={s.avatarInitials}>{initials}</Text>
               )}
@@ -510,7 +516,12 @@ function ProfileContent() {
           <TouchableWithoutFeedback>
             <Animated.View style={{ transform: [{ scale: imageScale }] }}>
               {avatarUrl ? (
-                <Image source={{ uri: avatarUrl }} style={s.pfpExpandedImage} resizeMode="cover" />
+                <Image
+                  source={{ uri: avatarUrl }}
+                  style={s.pfpExpandedImage}
+                  cachePolicy="memory-disk"
+                  contentFit="cover"
+                />
               ) : (
                 <View style={s.pfpExpandedInitials}>
                   <Text style={s.pfpExpandedInitialsText}>{initials}</Text>
