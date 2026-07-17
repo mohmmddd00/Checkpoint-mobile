@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   View, Text, ScrollView, TouchableOpacity,
   Image, StyleSheet,
@@ -187,59 +187,107 @@ function EmptyState() {
 
 // ─── PAGE CONTENT ────────────────────────────────────────────────────────────
 
-function MyVaultsLoaded({ vaults, setVaults }: { vaults: Vault[]; setVaults: React.Dispatch<React.SetStateAction<Vault[]>> }) {
+const PAGE_LIMIT = 10;
+
+function MyVaultsLoaded({
+  vaults,
+  setVaults,
+  totalVaults,
+  setTotalVaults,
+  loadingMore,
+  hasMore,
+  spinAnim,
+  onEndReached,
+}: {
+  vaults: Vault[];
+  setVaults: React.Dispatch<React.SetStateAction<Vault[]>>;
+  totalVaults: number;
+  setTotalVaults: React.Dispatch<React.SetStateAction<number>>;
+  loadingMore: boolean;
+  hasMore: boolean;
+  spinAnim: Animated.Value;
+  onEndReached: () => void;
+}) {
   const navigation = useNavigation<Nav>();
   const { opacity, translateY } = useFadeUp();
 
   return (
     <Animated.View style={[{ flex: 1 }, { opacity, transform: [{ translateY }] }]}>
-    <ScrollView
-      style={s.container}
-      contentContainerStyle={s.scrollContent}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* Back */}
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        style={s.backButton}
+      <ScrollView
+        style={s.container}
+        contentContainerStyle={s.scrollContent}
+        showsVerticalScrollIndicator={false}
+        onScroll={({ nativeEvent }) => {
+          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+          if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 100) {
+            onEndReached();
+          }
+        }}
+        scrollEventThrottle={16}
       >
-        <Text style={s.backText}>← Back</Text>
-      </TouchableOpacity>
-
-      {/* Header */}
-      <View style={s.headerRow}>
-        <Text style={s.pageTitle}>My Vaults</Text>
-        <TouchableOpacity
-          style={s.newVaultBtn}
-          onPressIn={() => navigation.navigate("VaultCreation")}
-          activeOpacity={0.85}
-        >
-          <Text style={s.newVaultBtnText}>+ New Vault</Text>
+        {/* Back */}
+        <TouchableOpacity onPress={() => navigation.goBack()} style={s.backButton}>
+          <Text style={s.backText}>← Back</Text>
         </TouchableOpacity>
-      </View>
 
-      <Text style={s.subtitle}>
-        {vaults.length === 0
-          ? "You haven't created any vaults yet."
-          : `${vaults.length} vault${vaults.length === 1 ? "" : "s"}`}
-      </Text>
-
-      <View style={s.divider} />
-
-      {vaults.length === 0 ? (
-        <EmptyState />
-      ) : (
-        <View style={s.list}>
-          {vaults.map((vault) => (
-            <VaultListCard
-              key={vault._id}
-              vault={vault}
-              onDeleted={(id) => setVaults((prev) => prev.filter((v) => v._id !== id))}
-            />
-          ))}
+        {/* Header */}
+        <View style={s.headerRow}>
+          <Text style={s.pageTitle}>My Vaults</Text>
+          <TouchableOpacity
+            style={s.newVaultBtn}
+            onPressIn={() => navigation.navigate("VaultCreation")}
+            activeOpacity={0.85}
+          >
+            <Text style={s.newVaultBtnText}>+ New Vault</Text>
+          </TouchableOpacity>
         </View>
-      )}
-    </ScrollView>
+
+        <Text style={s.subtitle}>
+          {totalVaults === 0
+            ? "You haven't created any vaults yet."
+            : `${totalVaults} vault${totalVaults === 1 ? "" : "s"}`}
+        </Text>
+
+        <View style={s.divider} />
+
+        {vaults.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <View style={s.list}>
+            {vaults.map((vault) => (
+              <VaultListCard
+                key={vault._id}
+                vault={vault}
+                onDeleted={(id) => {
+                  setVaults((prev) => prev.filter((v) => v._id !== id));
+                  setTotalVaults((prev) => prev - 1);
+                }}
+              />
+            ))}
+
+            {/* Spinner while loading next page */}
+            {loadingMore && (
+              <View style={s.spinnerWrap}>
+                <Animated.View
+                  style={[s.spinner, {
+                    transform: [{
+                      rotate: spinAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ["0deg", "360deg"],
+                      }),
+                    }],
+                  }]}
+                />
+              </View>
+            )}
+
+            {/* End of list */}
+            {!hasMore && vaults.length > 0 && (
+              <Text style={s.endText}>All {totalVaults} vaults loaded</Text>
+            )}
+          </View>
+        )}
+      </ScrollView>
     </Animated.View>
   );
 }
@@ -247,25 +295,57 @@ function MyVaultsLoaded({ vaults, setVaults }: { vaults: Vault[]; setVaults: Rea
 function MyVaultsContent() {
   const [vaults, setVaults] = useState<Vault[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [totalVaults, setTotalVaults] = useState(0);
+  const isFetchingRef = useRef(false);
+  const spinAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.timing(spinAnim, { toValue: 1, duration: 750, useNativeDriver: true })
+    );
+    if (loadingMore) loop.start();
+    else { loop.stop(); spinAnim.setValue(0); }
+    return () => loop.stop();
+  }, [loadingMore]);
+
+  const fetchPage = async (pageNum: number, isFirst: boolean) => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+    if (isFirst) setLoading(true); else setLoadingMore(true);
+    try {
+      const token = await storage.getToken();
+      const res = await fetch(
+        `${API_URL}/vaults/my/paginated?page=${pageNum}&limit=${PAGE_LIMIT}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!res.ok) return;
+      const data = await res.json();
+      setVaults((prev) => isFirst ? data.vaults : [...prev, ...data.vaults]);
+      setHasMore(data.hasMore);
+      setTotalVaults(data.total);
+      setPage(pageNum);
+    } catch (err) {
+      console.error("Failed to load vaults:", err);
+    } finally {
+      if (isFirst) setLoading(false); else setLoadingMore(false);
+      isFetchingRef.current = false;
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
-      const load = async () => {
-        try {
-          const token = await storage.getToken();
-          const res = await fetch(`${API_URL}/vaults`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (res.ok) setVaults(await res.json());
-        } catch (err) {
-          console.error("Failed to load vaults:", err);
-        } finally {
-          setLoading(false);
-        }
-      };
-      load();
+      setPage(1);
+      setVaults([]);
+      fetchPage(1, true);
     }, [])
   );
+
+  const handleEndReached = () => {
+    if (hasMore && !loadingMore && !loading) fetchPage(page + 1, false);
+  };
 
   if (loading) {
     return (
@@ -279,7 +359,18 @@ function MyVaultsContent() {
     );
   }
 
-  return <MyVaultsLoaded vaults={vaults} setVaults={setVaults} />;
+  return (
+    <MyVaultsLoaded
+      vaults={vaults}
+      setVaults={setVaults}
+      totalVaults={totalVaults}
+      setTotalVaults={setTotalVaults}
+      loadingMore={loadingMore}
+      hasMore={hasMore}
+      spinAnim={spinAnim}
+      onEndReached={handleEndReached}
+    />
+  );
 }
 
 // ─── SCREEN EXPORT ────────────────────────────────────────────────────────────
@@ -384,5 +475,23 @@ const s = StyleSheet.create({
     fontSize: 14,
     textAlign: "center",
     paddingHorizontal: 20,
+  },
+  spinnerWrap: {
+    alignItems: "center",
+    paddingVertical: 32,
+  },
+  spinner: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 3,
+    borderColor: "rgba(158,27,50,0.2)",
+    borderTopColor: "#9E1B32",
+  },
+  endText: {
+    textAlign: "center",
+    color: "#8A6D73",
+    fontSize: 12,
+    paddingVertical: 24,
   },
 });
