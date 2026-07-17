@@ -2,11 +2,11 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
-  Image,
   TouchableOpacity,
   StyleSheet,
   Animated,
 } from "react-native";
+import { Image } from "expo-image";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../App";
@@ -61,7 +61,7 @@ function UserAvatar({ user }: { user: UserRef }) {
   return (
     <View style={s.avatar}>
       {avatarUrl ? (
-        <Image source={{ uri: avatarUrl }} style={s.avatarImage} />
+        <Image source={{ uri: avatarUrl }} style={s.avatarImage} cachePolicy="memory-disk" contentFit="cover" />
       ) : (
         <Text style={s.avatarInitials}>{initials}</Text>
       )}
@@ -456,6 +456,7 @@ const s = StyleSheet.create({
   avatarImage: {
     width: "100%",
     height: "100%",
+    borderRadius: 21,
   },
   avatarInitials: {
     color: "#F7F4F5",
