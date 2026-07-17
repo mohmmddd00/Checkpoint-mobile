@@ -196,57 +196,113 @@ function CommunityReviewCard({
 
 // ─── FEED (exported) ──────────────────────────────────────────────────────────
 
-export function CommunityReviewsFeed({ refreshKey }: { refreshKey?: number }) {
+const PAGE_LIMIT = 10;
+
+export function CommunityReviewsFeed({
+  refreshKey,
+  onEndReached,
+  onPaginationReady,
+}: {
+  refreshKey?: number;
+  onEndReached?: (fn: () => void) => void;
+  onPaginationReady?: (footer: React.ReactNode) => void;
+}) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute();
   const [reviews, setReviews] = useState<CommunityReview[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [totalReviews, setTotalReviews] = useState(0);
+  const isFetchingRef = useRef(false);
+  const spinAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const translateAnim = useRef(new Animated.Value(16)).current;
   const [resolvedUserId, setResolvedUserId] = useState<string | null>(null);
 
-  const loadReviews = async () => {
+  const fetchPage = async (pageNum: number, isFirst: boolean) => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+    if (isFirst) setLoading(true); else setLoadingMore(true);
     try {
       const token = await storage.getToken();
-      const res = await fetch(`${API_URL}/gamelogs/public`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(
+        `${API_URL}/gamelogs/public/paginated?page=${pageNum}&limit=${PAGE_LIMIT}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       if (!res.ok) return;
-      const logsData = await res.json();
-      setReviews(logsData.filter((r: any) => r.user != null));
+      const data = await res.json();
+      setReviews((prev) => isFirst ? data.reviews : [...prev, ...data.reviews]);
+      setHasMore(data.hasMore);
+      setTotalReviews(data.total);
+      setPage(pageNum);
     } catch (err) {
       console.error("Failed to load community reviews:", err);
     } finally {
-      setLoading(false);
+      if (isFirst) setLoading(false); else setLoadingMore(false);
+      isFetchingRef.current = false;
     }
   };
 
+  const loadMore = () => {
+    if (hasMore && !loadingMore && !loading) fetchPage(page + 1, false);
+  };
+
   useEffect(() => {
-    loadReviews();
+    fetchPage(1, true);
   }, [refreshKey]);
 
   useEffect(() => {
     if ((route.params as any)?.editedAt) {
-      loadReviews();
+      fetchPage(1, true);
     }
   }, [(route.params as any)?.editedAt]);
 
   useEffect(() => {
     if (!loading) {
       Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 400,
-          useNativeDriver: true,
-        }),
-        Animated.timing(translateAnim, {
-          toValue: 0,
-          duration: 400,
-          useNativeDriver: true,
-        }),
+        Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }),
+        Animated.timing(translateAnim, { toValue: 0, duration: 400, useNativeDriver: true }),
       ]).start();
     }
   }, [loading]);
+
+  // Spin animation for loading more spinner
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.timing(spinAnim, { toValue: 1, duration: 750, useNativeDriver: true })
+    );
+    if (loadingMore) loop.start();
+    else { loop.stop(); spinAnim.setValue(0); }
+    return () => loop.stop();
+  }, [loadingMore]);
+
+  // Expose loadMore to parent's ScrollView onEndReached
+  useEffect(() => {
+    onEndReached?.(loadMore);
+  }, [hasMore, loadingMore, loading, page]);
+
+  // Expose footer to parent so it renders below the ScrollView content
+  useEffect(() => {
+    const footer = loadingMore ? (
+      <View style={s.spinnerWrap}>
+        <Animated.View
+          style={[s.spinner, {
+            transform: [{
+              rotate: spinAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: ["0deg", "360deg"],
+              }),
+            }],
+          }]}
+        />
+      </View>
+    ) : !hasMore && reviews.length > 0 ? (
+      <Text style={s.endText}>All {totalReviews} reviews loaded</Text>
+    ) : null;
+    onPaginationReady?.(footer);
+  }, [loadingMore, hasMore, reviews.length, totalReviews]);
 
   useEffect(() => {
     storage.getToken().then((token) => {
@@ -260,6 +316,7 @@ export function CommunityReviewsFeed({ refreshKey }: { refreshKey?: number }) {
 
   const handleDelete = (id: string) => {
     setReviews((prev) => prev.filter((r) => r._id !== id));
+    setTotalReviews((prev) => prev - 1);
   };
 
   const handleEdit = (review: CommunityReview) => {
@@ -320,6 +377,24 @@ const s = StyleSheet.create({
   emptyText: {
     color: "#8A6D73",
     fontSize: 14,
+  },
+  spinnerWrap: {
+    alignItems: "center",
+    paddingVertical: 32,
+  },
+  spinner: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 3,
+    borderColor: "rgba(158,27,50,0.2)",
+    borderTopColor: "#9E1B32",
+  },
+  endText: {
+    textAlign: "center",
+    color: "#8A6D73",
+    fontSize: 12,
+    paddingVertical: 24,
   },
 
   // Card

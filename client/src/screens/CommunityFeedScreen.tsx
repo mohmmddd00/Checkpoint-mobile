@@ -79,6 +79,8 @@ function CommunityFeedContent() {
   const [refreshing, setRefreshing] = useState(false);
   const [vaultRefreshKey, setVaultRefreshKey] = useState(0);
   const [reviewRefreshKey, setReviewRefreshKey] = useState(0);
+  const [paginationFooter, setPaginationFooter] = useState<React.ReactNode>(null);
+  const loadMoreRef = useRef<(() => void) | null>(null);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -96,6 +98,13 @@ function CommunityFeedContent() {
       contentContainerStyle={s.scrollContent}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
+      onScroll={({ nativeEvent }) => {
+        const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+        if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 100) {
+          loadMoreRef.current?.();
+        }
+      }}
+      scrollEventThrottle={16}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -117,7 +126,14 @@ function CommunityFeedContent() {
 
       {/* ── SWAPPED FEED ── */}
       {activeTab === "reviews" ? (
-        <CommunityReviewsFeed refreshKey={reviewRefreshKey} />
+        <>
+          <CommunityReviewsFeed
+            refreshKey={reviewRefreshKey}
+            onEndReached={(fn) => { loadMoreRef.current = fn; }}
+            onPaginationReady={(footer) => setPaginationFooter(footer)}
+          />
+          {paginationFooter}
+        </>
       ) : (
         <CommunityVaultsFeed refreshKey={vaultRefreshKey} />
       )}
