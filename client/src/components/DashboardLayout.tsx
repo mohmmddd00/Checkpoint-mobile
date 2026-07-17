@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import {
   View, Text, TouchableOpacity, StyleSheet, Animated,
-  Pressable, Image, TextInput, FlatList, StatusBar, Platform,
+  Pressable, TextInput, FlatList, StatusBar, Platform,
 } from "react-native";
+import { Image } from "expo-image";
 import { useNavigation, useRoute, useNavigationState } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { ReactNode } from "react";
@@ -166,7 +167,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               style={styles.avatar}
             >
               {userInfo?.profileImage ? (
-                <Image source={{ uri: userInfo.profileImage }} style={styles.avatarImage} />
+                <Image
+                  source={{ uri: userInfo.profileImage }}
+                  style={styles.avatarImage}
+                  cachePolicy="memory-disk"
+                  contentFit="cover"
+                />
               ) : (
                 <Text style={styles.avatarInitials}>
                   {getInitials(userInfo?.firstName || "", userInfo?.lastName || "", userInfo?.username || "")}
@@ -311,7 +317,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <View style={styles.userCard}>
               <View style={styles.userAvatar}>
                 {userInfo.profileImage ? (
-                  <Image source={{ uri: userInfo.profileImage }} style={styles.userAvatarImage} />
+                  <Image
+                    source={{ uri: userInfo.profileImage }}
+                    style={styles.userAvatarImage}
+                    cachePolicy="memory-disk"
+                    contentFit="cover"
+                  />
                 ) : (
                   <Text style={styles.userAvatarInitials}>
                     {getInitials(userInfo.firstName, userInfo.lastName, userInfo.username)}
