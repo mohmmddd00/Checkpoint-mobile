@@ -2,11 +2,11 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
-  Image,
   TouchableOpacity,
   StyleSheet,
   Animated,
 } from "react-native";
+import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../App";
@@ -24,6 +24,8 @@ function resolveAvatarUrl(path: string | null | undefined): string | null {
   if (path.startsWith("http") || path.startsWith("blob:")) return path;
   return `${STATIC_BASE_URL}${path}`;
 }
+
+const avatarUrlCache = new Map<string, string>();
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
@@ -56,14 +58,23 @@ interface CommunityVault {
 // ─── USER AVATAR ──────────────────────────────────────────────────────────────
 
 function UserAvatar({ user }: { user: UserRef }) {
-  const avatarUrl = resolveAvatarUrl(user.profileImage);
+  if (!avatarUrlCache.has(user._id)) {
+    const resolved = resolveAvatarUrl(user.profileImage);
+    if (resolved) avatarUrlCache.set(user._id, resolved);
+  }
+  const avatarUrl = avatarUrlCache.get(user._id) ?? null;
   const initials =
     `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() || "?";
 
   return (
     <View style={s.avatar}>
       {avatarUrl ? (
-        <Image source={{ uri: avatarUrl }} style={s.avatarImage} />
+        <Image
+          source={{ uri: avatarUrl }}
+          style={s.avatarImage}
+          cachePolicy="memory-disk"
+          contentFit="cover"
+        />
       ) : (
         <Text style={s.avatarInitials}>{initials}</Text>
       )}
