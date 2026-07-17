@@ -82,6 +82,11 @@ function CommunityFeedContent() {
   const [paginationFooter, setPaginationFooter] = useState<React.ReactNode>(null);
   const loadMoreRef = useRef<(() => void) | null>(null);
 
+  const handleTabSwitch = (tab: "reviews" | "vaults") => {
+    setPaginationFooter(null);
+    setActiveTab(tab);
+  };
+
   const handleRefresh = async () => {
     setRefreshing(true);
     if (activeTab === "vaults") {
@@ -120,7 +125,7 @@ function CommunityFeedContent() {
         Discover what the gaming community is logging and organizing.
       </Text>
 
-      <CommunityToggle activeTab={activeTab} onToggle={setActiveTab} />
+      <CommunityToggle activeTab={activeTab} onToggle={handleTabSwitch} />
 
       <View style={s.divider} />
 
