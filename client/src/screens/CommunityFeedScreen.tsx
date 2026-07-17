@@ -135,7 +135,14 @@ function CommunityFeedContent() {
           {paginationFooter}
         </>
       ) : (
-        <CommunityVaultsFeed refreshKey={vaultRefreshKey} />
+        <>
+          <CommunityVaultsFeed
+            refreshKey={vaultRefreshKey}
+            onEndReached={(fn) => { loadMoreRef.current = fn; }}
+            onPaginationReady={(footer) => setPaginationFooter(footer)}
+          />
+          {paginationFooter}
+        </>
       )}
     </ScrollView>
   );

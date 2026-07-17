@@ -206,9 +206,25 @@ function CommunityVaultCard({
 
 // ─── FEED (exported) ──────────────────────────────────────────────────────────
 
-export function CommunityVaultsFeed({ refreshKey }: { refreshKey?: number }) {
+const PAGE_LIMIT = 10;
+
+export function CommunityVaultsFeed({
+  refreshKey,
+  onEndReached,
+  onPaginationReady,
+}: {
+  refreshKey?: number;
+  onEndReached?: (fn: () => void) => void;
+  onPaginationReady?: (footer: React.ReactNode) => void;
+}) {
   const [vaults, setVaults] = useState<CommunityVault[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [totalVaults, setTotalVaults] = useState(0);
+  const isFetchingRef = useRef(false);
+  const spinAnim = useRef(new Animated.Value(0)).current;
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const translateAnim = useRef(new Animated.Value(16)).current;
@@ -223,41 +239,79 @@ export function CommunityVaultsFeed({ refreshKey }: { refreshKey?: number }) {
     });
   }, []);
 
+  const fetchPage = async (pageNum: number, isFirst: boolean) => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+    if (isFirst) setLoading(true); else setLoadingMore(true);
+    try {
+      const token = await storage.getToken();
+      const res = await fetch(
+        `${API_URL}/vaults/public/paginated?page=${pageNum}&limit=${PAGE_LIMIT}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!res.ok) return;
+      const data = await res.json();
+      setVaults((prev) => isFirst ? data.vaults : [...prev, ...data.vaults]);
+      setHasMore(data.hasMore);
+      setTotalVaults(data.total);
+      setPage(pageNum);
+    } catch (err) {
+      console.error("Failed to load community vaults:", err);
+    } finally {
+      if (isFirst) setLoading(false); else setLoadingMore(false);
+      isFetchingRef.current = false;
+    }
+  };
+
+  const loadMore = () => {
+    if (hasMore && !loadingMore && !loading) fetchPage(page + 1, false);
+  };
+
   useEffect(() => {
-    const load = async () => {
-      try {
-        const token = await storage.getToken();
-        const res = await fetch(`${API_URL}/vaults/public`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) return;
-        const data = await res.json();
-        setVaults(data.filter((v: any) => v.user != null));
-      } catch (err) {
-        console.error("Failed to load community vaults:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
+    fetchPage(1, true);
   }, [refreshKey]);
 
   useEffect(() => {
     if (!loading) {
       Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 400,
-          useNativeDriver: true,
-        }),
-        Animated.timing(translateAnim, {
-          toValue: 0,
-          duration: 400,
-          useNativeDriver: true,
-        }),
+        Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }),
+        Animated.timing(translateAnim, { toValue: 0, duration: 400, useNativeDriver: true }),
       ]).start();
     }
   }, [loading]);
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.timing(spinAnim, { toValue: 1, duration: 750, useNativeDriver: true })
+    );
+    if (loadingMore) loop.start();
+    else { loop.stop(); spinAnim.setValue(0); }
+    return () => loop.stop();
+  }, [loadingMore]);
+
+  useEffect(() => {
+    onEndReached?.(loadMore);
+  }, [hasMore, loadingMore, loading, page]);
+
+  useEffect(() => {
+    const footer = loadingMore ? (
+      <View style={s.spinnerWrap}>
+        <Animated.View
+          style={[s.spinner, {
+            transform: [{
+              rotate: spinAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: ["0deg", "360deg"],
+              }),
+            }],
+          }]}
+        />
+      </View>
+    ) : !hasMore && vaults.length > 0 ? (
+      <Text style={s.endText}>All {totalVaults} vaults loaded</Text>
+    ) : null;
+    onPaginationReady?.(footer);
+  }, [loadingMore, hasMore, vaults.length, totalVaults]);
 
   if (loading) return <CommunityVaultsPageSkeleton />;
 
@@ -428,5 +482,23 @@ const s = StyleSheet.create({
     fontSize: 12,
     lineHeight: 20,
     marginTop: 10,
+  },
+  spinnerWrap: {
+    alignItems: "center",
+    paddingVertical: 32,
+  },
+  spinner: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 3,
+    borderColor: "rgba(158,27,50,0.2)",
+    borderTopColor: "#9E1B32",
+  },
+  endText: {
+    textAlign: "center",
+    color: "#8A6D73",
+    fontSize: 12,
+    paddingVertical: 24,
   },
 });
