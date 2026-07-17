@@ -171,70 +171,125 @@ function MonthGroupRow({
 
 // ─── CONTENT ─────────────────────────────────────────────────────────────────
 
+const PAGE_LIMIT = 24;
+
 function LogsContent() {
   const [logs, setLogs] = useState<LoggedGame[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [totalLogs, setTotalLogs] = useState(0);
   const [logSearch, setLogSearch] = useState("");
+  const isFetchingRef = useRef(false);
+  const spinAnim = useRef(new Animated.Value(0)).current;
   const opacity = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(12)).current;
 
-  useEffect(() => {
-    const fetchLogs = async () => {
-      try {
-        setLoading(true);
-        const token = await AsyncStorage.getItem("token");
-        const res = await fetch(`${API_URL}/gamelogs`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error("Failed fetching logs");
-        const logData = await res.json();
+  const formatLog = (log: any, index: number): LoggedGame => {
+    const displayDate = log.timestamp
+      ? new Date(log.timestamp).toLocaleDateString("en-GB", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        })
+      : "TBA";
+    return {
+      id: log._id || `log-${index}`,
+      name: log.title,
+      released: displayDate,
+      background_image: log.coverImage || null,
+      rating: log.rating ?? null,
+      platform: log.platform || "",
+      status: log.status || "",
+      review: log.review || "",
+    };
+  };
 
-        const formatted: LoggedGame[] = logData.map((log: any, index: number) => {
-          const displayDate = log.timestamp
-            ? new Date(log.timestamp).toLocaleDateString("en-GB", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })
-            : "TBA";
-          return {
-            id: log._id || `log-${index}`,
-            name: log.title,
-            released: displayDate,
-            background_image: log.coverImage || null,
-            rating: log.rating ?? null,
-            platform: log.platform || "",
-            status: log.status || "",
-            review: log.review || "",
-          };
-        });
-
-        setLogs(formatted);
-      } catch (err) {
-        console.error("Error loading logs:", err);
-      } finally {
+  const fetchPage = async (pageNum: number, isFirst: boolean) => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+    if (isFirst) setLoading(true); else setLoadingMore(true);
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const res = await fetch(
+        `${API_URL}/gamelogs/paginated?page=${pageNum}&limit=${PAGE_LIMIT}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!res.ok) throw new Error("Failed fetching logs");
+      const data = await res.json();
+      const formatted = data.logs.map((log: any, i: number) => formatLog(log, i));
+      setLogs((prev) => isFirst ? formatted : [...prev, ...formatted]);
+      setHasMore(data.hasMore);
+      setTotalLogs(data.total);
+      setPage(pageNum);
+    } catch (err) {
+      console.error("Error loading logs:", err);
+    } finally {
+      if (isFirst) {
         setLoading(false);
         Animated.parallel([
           Animated.timing(opacity, { toValue: 1, duration: 350, useNativeDriver: true }),
           Animated.timing(translateY, { toValue: 0, duration: 350, useNativeDriver: true }),
         ]).start();
+      } else {
+        setLoadingMore(false);
       }
-    };
-    fetchLogs();
+      isFetchingRef.current = false;
+    }
+  };
+
+  useEffect(() => {
+    fetchPage(1, true);
   }, []);
 
   const handleDeleted = (id: string) => {
     setLogs((prev) => prev.filter((g) => g.id !== id));
+    setTotalLogs((prev) => prev - 1);
   };
 
   const handleEdited = (id: string, updated: Partial<LoggedGame>) => {
     setLogs((prev) => prev.map((g) => g.id === id ? { ...g, ...updated } : g));
   };
 
-  const filteredLogs = logSearch.trim()
-    ? logs.filter((g) => g.name.toLowerCase().includes(logSearch.trim().toLowerCase()))
-    : logs;
+  const [searchResults, setSearchResults] = useState<LoggedGame[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  useEffect(() => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    if (!logSearch.trim()) { setSearchResults([]); setIsSearching(false); return; }
+    setIsSearching(true);
+    searchDebounceRef.current = setTimeout(async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        const res = await fetch(
+          `${API_URL}/gamelogs/search?q=${encodeURIComponent(logSearch.trim())}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (!res.ok) throw new Error("Search failed");
+        const data = await res.json();
+        const formatted = data.map((log: any, i: number) => formatLog(log, i));
+        setSearchResults(formatted);
+      } catch (err) {
+        console.error("Search error:", err);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+    return () => { if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current); };
+  }, [logSearch]);
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.timing(spinAnim, { toValue: 1, duration: 750, useNativeDriver: true })
+    );
+    if (loadingMore || isSearching) loop.start();
+    else { loop.stop(); spinAnim.setValue(0); }
+    return () => loop.stop();
+  }, [loadingMore, isSearching]);
+
+  const filteredLogs = logSearch.trim() ? searchResults : logs;
   const monthGroups = buildMonthGroups(filteredLogs);
 
   if (loading) {
@@ -256,8 +311,10 @@ function LogsContent() {
             </Text>
             <Text style={s.subheading}>
               {logSearch
-                ? `Showing results for "${logSearch}"`
-                : `${logs.length} game${logs.length === 1 ? "" : "s"} logged`}
+                ? isSearching
+                  ? "Searching..."
+                  : `${searchResults.length} result${searchResults.length === 1 ? "" : "s"} for "${logSearch}"`
+                : `${totalLogs} game${totalLogs === 1 ? "" : "s"} logged`}
             </Text>
             <View style={s.divider} />
 
@@ -293,13 +350,31 @@ function LogsContent() {
           </>
         }
         ListEmptyComponent={
-          <View style={s.emptyWrap}>
-            <Text style={s.emptyText}>
-              {logSearch
-                ? `No logged games match "${logSearch}".`
-                : "You haven't logged any games yet! Use the + button to add some."}
-            </Text>
-          </View>
+          isSearching || loadingMore ? (
+            <View style={s.spinnerWrap}>
+              <Animated.View
+                style={[
+                  s.spinner,
+                  {
+                    transform: [{
+                      rotate: spinAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ["0deg", "360deg"],
+                      }),
+                    }],
+                  },
+                ]}
+              />
+            </View>
+          ) : (
+            <View style={s.emptyWrap}>
+              <Text style={s.emptyText}>
+                {logSearch
+                  ? `No logged games match "${logSearch}".`
+                  : "You haven't logged any games yet! Use the + button to add some."}
+              </Text>
+            </View>
+          )
         }
         renderItem={({ item }) => (
           <MonthGroupRow
@@ -309,6 +384,33 @@ function LogsContent() {
           />
         )}
         ItemSeparatorComponent={() => <View style={{ height: 48 }} />}
+        onEndReached={() => {
+          if (hasMore && !loadingMore && !loading && !logSearch) {
+            fetchPage(page + 1, false);
+          }
+        }}
+        onEndReachedThreshold={0.3}
+        ListFooterComponent={
+          loadingMore ? (
+            <View style={s.spinnerWrap}>
+              <Animated.View
+                style={[
+                  s.spinner,
+                  {
+                    transform: [{
+                      rotate: spinAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ["0deg", "360deg"],
+                      }),
+                    }],
+                  },
+                ]}
+              />
+            </View>
+          ) : !hasMore && logs.length > 0 && !logSearch ? (
+            <Text style={s.endText}>All {totalLogs} logs loaded</Text>
+          ) : null
+        }
       />
     </Animated.View>
   );
@@ -512,5 +614,25 @@ const s = StyleSheet.create({
   cardDate: {
     color: "#8A6D73",
     fontSize: 11,
+  },
+
+  // Pagination footer
+  spinnerWrap: {
+    alignItems: "center",
+    paddingVertical: 32,
+  },
+  spinner: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 3,
+    borderColor: "rgba(158,27,50,0.2)",
+    borderTopColor: "#9E1B32",
+  },
+  endText: {
+    textAlign: "center",
+    color: "#8A6D73",
+    fontSize: 12,
+    paddingVertical: 24,
   },
 });
