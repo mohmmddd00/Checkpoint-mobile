@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   View, Text, ScrollView, TouchableOpacity,
-  Image, StyleSheet,
+  Image, StyleSheet, RefreshControl,
 } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -198,6 +198,8 @@ function MyVaultsLoaded({
   hasMore,
   spinAnim,
   onEndReached,
+  refreshing,
+  onRefresh,
 }: {
   vaults: Vault[];
   setVaults: React.Dispatch<React.SetStateAction<Vault[]>>;
@@ -207,6 +209,8 @@ function MyVaultsLoaded({
   hasMore: boolean;
   spinAnim: Animated.Value;
   onEndReached: () => void;
+  refreshing: boolean;
+  onRefresh: () => void;
 }) {
   const navigation = useNavigation<Nav>();
   const { opacity, translateY } = useFadeUp();
@@ -217,6 +221,14 @@ function MyVaultsLoaded({
         style={s.container}
         contentContainerStyle={s.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#9E1B32"
+            colors={["#9E1B32"]}
+          />
+        }
         onScroll={({ nativeEvent }) => {
           const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
           if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 100) {
@@ -296,6 +308,7 @@ function MyVaultsContent() {
   const [vaults, setVaults] = useState<Vault[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [totalVaults, setTotalVaults] = useState(0);
@@ -311,10 +324,10 @@ function MyVaultsContent() {
     return () => loop.stop();
   }, [loadingMore]);
 
-  const fetchPage = async (pageNum: number, isFirst: boolean) => {
+  const fetchPage = async (pageNum: number, isFirst: boolean, isRefresh = false) => {
     if (isFetchingRef.current) return;
     isFetchingRef.current = true;
-    if (isFirst) setLoading(true); else setLoadingMore(true);
+    if (isFirst && !isRefresh) setLoading(true); else if (!isFirst) setLoadingMore(true);
     try {
       const token = await storage.getToken();
       const res = await fetch(
@@ -347,6 +360,12 @@ function MyVaultsContent() {
     if (hasMore && !loadingMore && !loading) fetchPage(page + 1, false);
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchPage(1, true, true);
+    setTimeout(() => setRefreshing(false), 800);
+  };
+
   if (loading) {
     return (
       <ScrollView
@@ -369,6 +388,8 @@ function MyVaultsContent() {
       hasMore={hasMore}
       spinAnim={spinAnim}
       onEndReached={handleEndReached}
+      refreshing={refreshing}
+      onRefresh={handleRefresh}
     />
   );
 }
