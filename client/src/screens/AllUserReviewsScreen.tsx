@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Animated,
+  RefreshControl,
 } from "react-native";
 import { DashboardLayout } from "../components/DashboardLayout";
 import { useNavigation } from "@react-navigation/native";
@@ -109,6 +110,8 @@ function ReviewsContent({
   hasMore,
   spinAnim,
   onEndReached,
+  refreshing,
+  onRefresh,
 }: {
   reviews: GameLog[];
   totalReviews: number;
@@ -116,6 +119,8 @@ function ReviewsContent({
   hasMore: boolean;
   spinAnim: Animated.Value;
   onEndReached: () => void;
+  refreshing: boolean;
+  onRefresh: () => void;
 }) {
   const navigation = useNavigation<Nav>();
   const { opacity, translateY } = useFadeUp();
@@ -127,6 +132,14 @@ function ReviewsContent({
           data={reviews}
           keyExtractor={(item) => item._id}
           contentContainerStyle={s.listContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#9E1B32"
+              colors={["#9E1B32"]}
+            />
+          }
           ListHeaderComponent={
             <>
               <TouchableOpacity
@@ -183,6 +196,7 @@ export function AllUserReviewsScreen() {
   const [reviews, setReviews] = useState<GameLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [totalReviews, setTotalReviews] = useState(0);
@@ -198,10 +212,10 @@ export function AllUserReviewsScreen() {
     return () => loop.stop();
   }, [loadingMore]);
 
-  const fetchPage = async (pageNum: number, isFirst: boolean) => {
+  const fetchPage = async (pageNum: number, isFirst: boolean, isRefresh = false) => {
     if (isFetchingRef.current) return;
     isFetchingRef.current = true;
-    if (isFirst) setLoading(true); else setLoadingMore(true);
+    if (isFirst && !isRefresh) setLoading(true); else if (!isFirst) setLoadingMore(true);
     try {
       const token = await AsyncStorage.getItem("token");
       const res = await fetch(
@@ -235,6 +249,12 @@ export function AllUserReviewsScreen() {
     if (hasMore && !loadingMore && !loading) fetchPage(page + 1, false);
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchPage(1, true, true);
+    setTimeout(() => setRefreshing(false), 800);
+  };
+
   return (
     <DashboardLayout>
       {loading ? (
@@ -247,6 +267,8 @@ export function AllUserReviewsScreen() {
           hasMore={hasMore}
           spinAnim={spinAnim}
           onEndReached={handleEndReached}
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
         />
       )}
     </DashboardLayout>
