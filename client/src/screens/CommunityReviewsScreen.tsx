@@ -200,10 +200,12 @@ const PAGE_LIMIT = 10;
 
 export function CommunityReviewsFeed({
   refreshKey,
+  isRefreshing,
   onEndReached,
   onPaginationReady,
 }: {
   refreshKey?: number;
+  isRefreshing?: boolean;
   onEndReached?: (fn: () => void) => void;
   onPaginationReady?: (footer: React.ReactNode) => void;
 }) {
@@ -221,10 +223,10 @@ export function CommunityReviewsFeed({
   const translateAnim = useRef(new Animated.Value(16)).current;
   const [resolvedUserId, setResolvedUserId] = useState<string | null>(null);
 
-  const fetchPage = async (pageNum: number, isFirst: boolean) => {
+  const fetchPage = async (pageNum: number, isFirst: boolean, isRefresh = false) => {
     if (isFetchingRef.current) return;
     isFetchingRef.current = true;
-    if (isFirst) setLoading(true); else setLoadingMore(true);
+    if (isFirst && !isRefresh) setLoading(true); else if (!isFirst) setLoadingMore(true);
     try {
       const token = await storage.getToken();
       const res = await fetch(
@@ -250,7 +252,7 @@ export function CommunityReviewsFeed({
   };
 
   useEffect(() => {
-    fetchPage(1, true);
+    fetchPage(1, true, isRefreshing);
   }, [refreshKey]);
 
   useEffect(() => {

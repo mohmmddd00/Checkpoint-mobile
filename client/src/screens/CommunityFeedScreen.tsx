@@ -134,6 +134,7 @@ function CommunityFeedContent() {
         <>
           <CommunityReviewsFeed
             refreshKey={reviewRefreshKey}
+            isRefreshing={refreshing}
             onEndReached={(fn) => { loadMoreRef.current = fn; }}
             onPaginationReady={(footer) => setPaginationFooter(footer)}
           />
