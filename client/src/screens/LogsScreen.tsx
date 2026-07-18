@@ -245,11 +245,13 @@ function LogsContent() {
 
   const handleDeleted = (id: string) => {
     setLogs((prev) => prev.filter((g) => g.id !== id));
+    setSearchResults((prev) => prev.filter((g) => g.id !== id));
     setTotalLogs((prev) => prev - 1);
   };
 
   const handleEdited = (id: string, updated: Partial<LoggedGame>) => {
     setLogs((prev) => prev.map((g) => g.id === id ? { ...g, ...updated } : g));
+    setSearchResults((prev) => prev.map((g) => g.id === id ? { ...g, ...updated } : g));
   };
 
   const [searchResults, setSearchResults] = useState<LoggedGame[]>([]);
