@@ -196,7 +196,7 @@ function PublicVaultContent() {
       });
       if (res.ok) {
         cpToast.success("Vault deleted.");
-        navigation.navigate("CommunityReviews");
+        navigation.navigate("CommunityReviews", { initialTab: "vaults" });
       } else {
         cpToast.error("Failed to delete vault.");
       }
