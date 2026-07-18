@@ -144,6 +144,7 @@ function CommunityFeedContent() {
         <>
           <CommunityVaultsFeed
             refreshKey={vaultRefreshKey}
+            isRefreshing={refreshing}
             onEndReached={(fn) => { loadMoreRef.current = fn; }}
             onPaginationReady={(footer) => setPaginationFooter(footer)}
           />

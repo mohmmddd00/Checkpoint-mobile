@@ -221,10 +221,12 @@ const PAGE_LIMIT = 10;
 
 export function CommunityVaultsFeed({
   refreshKey,
+  isRefreshing,
   onEndReached,
   onPaginationReady,
 }: {
   refreshKey?: number;
+  isRefreshing?: boolean;
   onEndReached?: (fn: () => void) => void;
   onPaginationReady?: (footer: React.ReactNode) => void;
 }) {
@@ -250,10 +252,10 @@ export function CommunityVaultsFeed({
     });
   }, []);
 
-  const fetchPage = async (pageNum: number, isFirst: boolean) => {
+  const fetchPage = async (pageNum: number, isFirst: boolean, isRefresh = false) => {
     if (isFetchingRef.current) return;
     isFetchingRef.current = true;
-    if (isFirst) setLoading(true); else setLoadingMore(true);
+    if (isFirst && !isRefresh) setLoading(true); else if (!isFirst) setLoadingMore(true);
     try {
       const token = await storage.getToken();
       const res = await fetch(
@@ -279,7 +281,7 @@ export function CommunityVaultsFeed({
   };
 
   useEffect(() => {
-    fetchPage(1, true);
+    fetchPage(1, true, isRefreshing);
   }, [refreshKey]);
 
   useEffect(() => {
