@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Animated,
+  RefreshControl,
 } from "react-native";
 import Svg, { Circle, Line } from "react-native-svg";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -206,10 +207,12 @@ function LogsContent() {
     };
   };
 
-  const fetchPage = async (pageNum: number, isFirst: boolean) => {
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchPage = async (pageNum: number, isFirst: boolean, isRefresh = false) => {
     if (isFetchingRef.current) return;
     isFetchingRef.current = true;
-    if (isFirst) setLoading(true); else setLoadingMore(true);
+    if (isFirst && !isRefresh) setLoading(true); else if (!isFirst) setLoadingMore(true);
     try {
       const token = await AsyncStorage.getItem("token");
       const res = await fetch(
@@ -242,6 +245,12 @@ function LogsContent() {
   useEffect(() => {
     fetchPage(1, true);
   }, []);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchPage(1, true, true);
+    setTimeout(() => setRefreshing(false), 800);
+  };
 
   const handleDeleted = (id: string) => {
     setLogs((prev) => prev.filter((g) => g.id !== id));
@@ -305,6 +314,14 @@ function LogsContent() {
         keyExtractor={(item) => item.label}
         contentContainerStyle={s.listContent}
         keyboardShouldPersistTaps="handled"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor="#9E1B32"
+            colors={["#9E1B32"]}
+          />
+        }
         ListHeaderComponent={
           <>
             {/* Heading */}
