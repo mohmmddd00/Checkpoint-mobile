@@ -1,5 +1,6 @@
 import { NavigationContainer, DarkTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { LoginScreen } from "./src/screens/LoginScreen";
 import Toast from "react-native-toast-message";
 import { toastConfig } from "./src/utils/toastConfig";
@@ -34,6 +35,7 @@ import { ResetPasswordScreen } from "./src/screens/ResetPasswordScreen";
 export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
+  MainTabs: undefined;
   CompleteProfile: { token: string };
   Home: undefined;
   VerifyAccount: { email: string };
@@ -63,7 +65,28 @@ export type RootStackParamList = {
   CommunityVaults: undefined;
 };
 
+export type TabParamList = {
+  Home: undefined;
+  Logs: undefined;
+  CommunityReviews: { initialTab?: "reviews" | "vaults"; editedAt?: number } | undefined;
+  Profile: undefined;
+};
+
 const Stack = createNativeStackNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator<TabParamList>();
+
+function MainTabs() {
+  return (
+    <Tab.Navigator
+      screenOptions={{ headerShown: false, tabBarStyle: { display: "none" } }}
+    >
+      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Logs" component={LogsScreen} />
+      <Tab.Screen name="CommunityReviews" component={CommunityFeedScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
+    </Tab.Navigator>
+  );
+}
 
 export default function App() {
   return (
@@ -75,9 +98,8 @@ export default function App() {
       >
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
-        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="MainTabs" component={MainTabs} />
         <Stack.Screen name="Game" component={GameScreen} />
-        <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="SavedVaults" component={SavedVaultsScreen} />
         <Stack.Screen name="PublicVault" component={PublicVaultScreen} />
         <Stack.Screen name="Stats" component={StatsScreen} />
@@ -85,7 +107,6 @@ export default function App() {
         <Stack.Screen name="MyVaults" component={MyVaultsScreen} />
         <Stack.Screen name="EditVault" component={EditVaultScreen} />
         <Stack.Screen name="VaultCreation" component={VaultCreationScreen} />
-        <Stack.Screen name="Logs" component={LogsScreen} />
         <Stack.Screen name="Reviews" component={AllUserReviewsScreen} />
         <Stack.Screen name="Review" component={ReviewScreen} />
         <Stack.Screen name="EditReview" component={EditReviewScreen} />
@@ -93,7 +114,6 @@ export default function App() {
         <Stack.Screen name="VerifyAccount" component={VerifyAccountScreen} />
         <Stack.Screen name="About" component={AboutScreen} />
         <Stack.Screen name="HallOfFame" component={HallOfFameScreen} />
-        <Stack.Screen name="CommunityReviews" component={CommunityFeedScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="SettingsProfile" component={SettingsProfileScreen} />
         <Stack.Screen name="SettingsDeleteAccount" component={SettingsDeleteAccountScreen} />
