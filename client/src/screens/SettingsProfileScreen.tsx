@@ -5,9 +5,9 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  Image,
   Alert,
 } from "react-native";
+import { Image } from "expo-image";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Svg, { Path, Circle as SvgCircle } from "react-native-svg";
 import * as ImagePicker from "expo-image-picker";
@@ -87,7 +87,7 @@ function AvatarUpload({
       <TouchableOpacity onPress={handlePress} activeOpacity={0.85}>
         <View style={avStyles.circle}>
           {preview ? (
-            <Image source={{ uri: preview }} style={avStyles.image} />
+            <Image source={{ uri: preview }} style={avStyles.image} cachePolicy="memory-disk" contentFit="cover" />
           ) : (
             <Text style={avStyles.initials}>{initials}</Text>
           )}
