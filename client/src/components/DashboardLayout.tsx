@@ -18,12 +18,7 @@ import Svg, { Path, Circle, Line } from "react-native-svg";
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 const STATIC_BASE_URL = API_URL!.replace(/\/api\/?$/, "");
 
-let userInfoCache: {
-  firstName: string;
-  lastName: string;
-  username: string;
-  profileImage: string | null;
-} | null = null;
+import { userInfoCache, setUserInfoCache } from "../utils/userInfoCache";
 
 function resolveAvatarUrl(path: string | null | undefined): string | null {
   if (!path) return null;
@@ -75,7 +70,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           username: data.username || "",
           profileImage: resolveAvatarUrl(data.profileImage),
         };
-        userInfoCache = resolved;
+        setUserInfoCache(resolved);
         setUserInfo(resolved);
       } catch (err) {
         console.error("Failed to load user info:", err);

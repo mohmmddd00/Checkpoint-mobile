@@ -16,6 +16,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { cpToast } from "../utils/toast";
 import { DashboardLayout } from "../components/DashboardLayout";
+import { userInfoCache } from "../utils/userInfoCache";
 import { ActionButton } from "../components/SettingsActionButton";
 import { RootStackParamList } from "../../App";
 
@@ -213,20 +214,20 @@ const fStyles = StyleSheet.create({
 // ─── Main Panel ───────────────────────────────────────────────────────────────
 
 function UserProfilePanel() {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [firstName, setFirstName] = useState(userInfoCache?.firstName ?? "");
+  const [lastName, setLastName] = useState(userInfoCache?.lastName ?? "");
   const [middleName, setMiddleName] = useState("");
-  const [username, setUsername] = useState("");
-  const [originalUsername, setOriginalUsername] = useState("");
-  const [originalFirstName, setOriginalFirstName] = useState("");
-  const [originalLastName, setOriginalLastName] = useState("");
+  const [username, setUsername] = useState(userInfoCache?.username ?? "");
+  const [originalUsername, setOriginalUsername] = useState(userInfoCache?.username ?? "");
+  const [originalFirstName, setOriginalFirstName] = useState(userInfoCache?.firstName ?? "");
+  const [originalLastName, setOriginalLastName] = useState(userInfoCache?.lastName ?? "");
   const [originalMiddleName, setOriginalMiddleName] = useState("");
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [authProvider, setAuthProvider] = useState("local");
   const [hasPassword, setHasPassword] = useState(false);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [originalAvatarUrl, setOriginalAvatarUrl] = useState<string | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(userInfoCache?.profileImage ?? null);
+  const [originalAvatarUrl, setOriginalAvatarUrl] = useState<string | null>(userInfoCache?.profileImage ?? null);
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [avatarRemoved, setAvatarRemoved] = useState(false);
   const [saving, setSaving] = useState(false);
