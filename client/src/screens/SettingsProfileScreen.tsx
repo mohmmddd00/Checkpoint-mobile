@@ -16,7 +16,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { cpToast } from "../utils/toast";
 import { DashboardLayout } from "../components/DashboardLayout";
-import { userInfoCache } from "../utils/userInfoCache";
+import { userInfoCache, setUserInfoCache } from "../utils/userInfoCache";
 import { ActionButton } from "../components/SettingsActionButton";
 import { RootStackParamList } from "../../App";
 
@@ -366,6 +366,7 @@ function UserProfilePanel() {
         if (resData.token) {
           await AsyncStorage.setItem("token", resData.token);
         }
+        setUserInfoCache(null);
         cpToast.success("Profile updated.");
         setOldPassword("");
         setNewPassword("");

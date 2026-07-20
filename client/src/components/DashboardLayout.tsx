@@ -58,6 +58,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     const loadUser = async () => {
       const token = await storage.getToken();
       if (!token) return;
+      if (userInfoCache) return;
       try {
         const res = await fetch(`${API_URL}/auth/me`, {
           headers: { Authorization: `Bearer ${token}` },

@@ -7,6 +7,6 @@ export type UserInfoCache = {
 
 export let userInfoCache: UserInfoCache = null;
 
-export function setUserInfoCache(value: NonNullable<UserInfoCache>) {
+export function setUserInfoCache(value: UserInfoCache) {
   userInfoCache = value;
 }
