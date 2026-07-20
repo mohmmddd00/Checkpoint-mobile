@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,7 +7,7 @@ import {
   Animated,
 } from "react-native";
 import { Image } from "expo-image";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../App";
 import { FloppyDiskIcon } from "../components/FloppyDiskIcon";
@@ -24,6 +24,10 @@ function resolveAvatarUrl(path: string | null | undefined): string | null {
   if (path.startsWith("http") || path.startsWith("blob:")) return path;
   return `${STATIC_BASE_URL}${path}`;
 }
+
+// ─── DELETION FLAG ────────────────────────────────────────────────────────────
+let _vaultWasDeleted = false;
+export function flagVaultDeleted() { _vaultWasDeleted = true; }
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
@@ -277,6 +281,17 @@ export function CommunityVaultsFeed({
   useEffect(() => {
     fetchPage(1, true, isRefreshing);
   }, [refreshKey]);
+
+  // Only re-fetches when PublicVaultScreen has flagged a deletion.
+  // Normal back navigation does nothing.
+  useFocusEffect(
+    useCallback(() => {
+      if (_vaultWasDeleted) {
+        _vaultWasDeleted = false;
+        fetchPage(1, true, true);
+      }
+    }, [])
+  );
 
   useEffect(() => {
     if (!loading) {

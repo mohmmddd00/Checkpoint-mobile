@@ -14,6 +14,7 @@ import { RootStackParamList } from "../../App";
 import { DashboardLayout } from "../components/DashboardLayout";
 import { PublicVaultPageSkeleton } from "../LoadingScreens/PublicVaultPageSkeleton";
 import { storage } from "../utils/storage";
+import { flagVaultDeleted } from "./CommunityVaultsScreen";
 import { cpToast } from "../utils/toast";
 import { useFadeUp } from "../hooks/useFadeUp";
 import { Animated } from "react-native";
@@ -196,7 +197,8 @@ function PublicVaultContent() {
       });
       if (res.ok) {
         cpToast.success("Vault deleted.");
-        navigation.navigate("CommunityReviews", { initialTab: "vaults" });
+        flagVaultDeleted();
+        navigation.goBack();
       } else {
         cpToast.error("Failed to delete vault.");
       }
