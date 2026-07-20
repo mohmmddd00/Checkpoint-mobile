@@ -255,11 +255,35 @@ export function CommunityReviewsFeed({
     fetchPage(1, true, isRefreshing);
   }, [refreshKey]);
 
+  const navigatedToEditRef = useRef(false);
+
+  const handleEdit = (review: CommunityReview) => {
+    navigatedToEditRef.current = true;
+    navigation.navigate("EditReview", {
+      id: review._id,
+      log: {
+        _id: review._id,
+        title: review.title,
+        platform: review.platform,
+        status: review.status,
+        rating: review.rating,
+        review: review.review,
+        timestamp: review.timestamp,
+        coverImage: review.coverImage,
+        releasedDate: review.releasedDate,
+      },
+    });
+  };
+
   useEffect(() => {
-    if ((route.params as any)?.editedAt) {
-      fetchPage(1, true);
-    }
-  }, [(route.params as any)?.editedAt]);
+    const unsubscribe = navigation.addListener("focus", () => {
+      if (navigatedToEditRef.current) {
+        navigatedToEditRef.current = false;
+        fetchPage(1, true);
+      }
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   useEffect(() => {
     if (!loading) {
@@ -319,23 +343,6 @@ export function CommunityReviewsFeed({
   const handleDelete = (id: string) => {
     setReviews((prev) => prev.filter((r) => r._id !== id));
     setTotalReviews((prev) => prev - 1);
-  };
-
-  const handleEdit = (review: CommunityReview) => {
-    navigation.navigate("EditReview", {
-      id: review._id,
-      log: {
-        _id: review._id,
-        title: review.title,
-        platform: review.platform,
-        status: review.status,
-        rating: review.rating,
-        review: review.review,
-        timestamp: review.timestamp,
-        coverImage: review.coverImage,
-        releasedDate: review.releasedDate,
-      },
-    });
   };
 
   if (loading) return <CommunityReviewsPageSkeleton />;
