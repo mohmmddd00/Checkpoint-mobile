@@ -48,7 +48,7 @@ function CommunityToggle({
         />
         <TouchableOpacity
           style={s.toggleBtn}
-          onPressIn={() => onToggle("reviews")}
+          onPress={() => onToggle("reviews")}
           activeOpacity={1}
         >
           <Text style={[s.toggleLabel, activeTab === "reviews" && s.toggleLabelActive]}>
@@ -57,7 +57,7 @@ function CommunityToggle({
         </TouchableOpacity>
         <TouchableOpacity
           style={s.toggleBtn}
-          onPressIn={() => onToggle("vaults")}
+          onPress={() => onToggle("vaults")}
           activeOpacity={1}
         >
           <Text style={[s.toggleLabel, activeTab === "vaults" && s.toggleLabelActive]}>
