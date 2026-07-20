@@ -255,10 +255,7 @@ export function CommunityReviewsFeed({
     fetchPage(1, true, isRefreshing);
   }, [refreshKey]);
 
-  const navigatedToEditRef = useRef(false);
-
   const handleEdit = (review: CommunityReview) => {
-    navigatedToEditRef.current = true;
     navigation.navigate("EditReview", {
       id: review._id,
       log: {
@@ -274,16 +271,6 @@ export function CommunityReviewsFeed({
       },
     });
   };
-
-  useEffect(() => {
-    const unsubscribe = navigation.addListener("focus", () => {
-      if (navigatedToEditRef.current) {
-        navigatedToEditRef.current = false;
-        fetchPage(1, true);
-      }
-    });
-    return unsubscribe;
-  }, [navigation]);
 
   useEffect(() => {
     if (!loading) {
