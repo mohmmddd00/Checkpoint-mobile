@@ -25,8 +25,6 @@ function resolveAvatarUrl(path: string | null | undefined): string | null {
   return `${STATIC_BASE_URL}${path}`;
 }
 
-const avatarUrlCache = new Map<string, string>();
-
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
 interface VaultGame {
@@ -58,11 +56,7 @@ interface CommunityVault {
 // ─── USER AVATAR ──────────────────────────────────────────────────────────────
 
 function UserAvatar({ user }: { user: UserRef }) {
-  if (!avatarUrlCache.has(user._id)) {
-    const resolved = resolveAvatarUrl(user.profileImage);
-    if (resolved) avatarUrlCache.set(user._id, resolved);
-  }
-  const avatarUrl = avatarUrlCache.get(user._id) ?? null;
+  const avatarUrl = resolveAvatarUrl(user.profileImage);
   const initials =
     `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() || "?";
 
