@@ -97,6 +97,10 @@ function CommunityVaultCard({
   const { saved, loading: saveLoading, toggle } = useSavedVault(vault._id, isOwnVault, vault.isSavedByCurrentUser);
   const [saveCount, setSaveCount] = useState<number | null>(vault.saveCount ?? null);
 
+  useEffect(() => {
+    if (vault.saveCount !== undefined) setSaveCount(vault.saveCount);
+  }, [vault.saveCount]);
+
   const handleToggleSave = async () => {
     if (saveLoading) return;
     const prevCount = saveCount;

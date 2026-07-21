@@ -374,6 +374,22 @@ export function ReviewEngagement({ gameLogId, initialEngagement }: ReviewEngagem
   const [loading, setLoading] = useState(true);
   const [showComments, setShowComments] = useState(false);
 
+  useEffect(() => {
+    if (!initialEngagement) return;
+    setReactions({
+      likes: initialEngagement.likes,
+      dislikes: initialEngagement.dislikes,
+      userReaction: initialEngagement.userReaction,
+      isOwnLog: initialEngagement.isOwnLog,
+    });
+    setCommentCount(initialEngagement.commentCount);
+  }, [
+    initialEngagement?.likes,
+    initialEngagement?.dislikes,
+    initialEngagement?.userReaction,
+    initialEngagement?.commentCount,
+  ]);
+
   const [token, setToken] = useState<string | null>(null);
   const [authHeaders, setAuthHeaders] = useState<Record<string, string>>({});
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);

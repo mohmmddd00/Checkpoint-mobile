@@ -9,6 +9,10 @@ export function useSavedVault(vaultId: string, isOwnVault: boolean, initialSaved
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (initialSaved !== undefined) setSaved(initialSaved);
+  }, [initialSaved]);
+
+  useEffect(() => {
     if (isOwnVault || initialSaved !== undefined) return;
     const check = async () => {
       try {
