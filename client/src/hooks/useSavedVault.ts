@@ -4,12 +4,12 @@ import { storage } from "../utils/storage";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
-export function useSavedVault(vaultId: string, isOwnVault: boolean) {
-  const [saved, setSaved] = useState(false);
+export function useSavedVault(vaultId: string, isOwnVault: boolean, initialSaved?: boolean) {
+  const [saved, setSaved] = useState(initialSaved ?? false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isOwnVault) return;
+    if (isOwnVault || initialSaved !== undefined) return;
     const check = async () => {
       try {
         const token = await storage.getToken();

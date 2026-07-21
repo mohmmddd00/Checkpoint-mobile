@@ -56,6 +56,7 @@ interface CommunityVault {
   createdAt: string;
   editedAt?: string | null;
   saveCount?: number;
+  isSavedByCurrentUser?: boolean;
 }
 
 // ─── USER AVATAR ──────────────────────────────────────────────────────────────
@@ -93,7 +94,7 @@ function CommunityVaultCard({
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [pressed, setPressed] = useState(false);
   const isOwnVault = !!currentUserId && vault.user._id === currentUserId;
-  const { saved, loading: saveLoading, toggle } = useSavedVault(vault._id, isOwnVault);
+  const { saved, loading: saveLoading, toggle } = useSavedVault(vault._id, isOwnVault, vault.isSavedByCurrentUser);
   const [saveCount, setSaveCount] = useState<number | null>(vault.saveCount ?? null);
 
   const handleToggleSave = async () => {
