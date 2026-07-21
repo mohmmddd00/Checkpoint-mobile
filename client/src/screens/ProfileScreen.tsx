@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useMemo } from "react";
 import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, ActivityIndicator, Animated, Modal, TouchableWithoutFeedback,
@@ -71,7 +71,7 @@ interface ReviewLogEntry extends GameLog {
 
 // ─── RATING CHART ────────────────────────────────────────────────────────────
 
-function RatingChart({ logs }: { logs: GameLog[] }) {
+const RatingChart = React.memo(function RatingChart({ logs }: { logs: GameLog[] }) {
   const buckets = [
     { label: "0–1", min: 0, max: 1 },
     { label: "2–3", min: 2, max: 3 },
@@ -110,7 +110,7 @@ function RatingChart({ logs }: { logs: GameLog[] }) {
       </View>
     </View>
   );
-}
+});
 
 // ─── STATUS BREAKDOWN ────────────────────────────────────────────────────────
 
@@ -120,7 +120,7 @@ const STATUS_COLORS: Record<string, string> = {
   Dropped: "#380B14",
 };
 
-function StatusBreakdown({ logs }: { logs: GameLog[] }) {
+const StatusBreakdown = React.memo(function StatusBreakdown({ logs }: { logs: GameLog[] }) {
   const statuses = ["Completed", "Playing", "Dropped"];
   const total = logs.length || 1;
   return (
@@ -147,11 +147,11 @@ function StatusBreakdown({ logs }: { logs: GameLog[] }) {
       </View>
     </View>
   );
-}
+});
 
 // ─── PLATFORM BREAKDOWN ──────────────────────────────────────────────────────
 
-function PlatformBreakdown({ logs }: { logs: GameLog[] }) {
+const PlatformBreakdown = React.memo(function PlatformBreakdown({ logs }: { logs: GameLog[] }) {
   const platformCounts: Record<string, number> = {};
   logs.forEach((l) => {
     if (l.platform) platformCounts[l.platform] = (platformCounts[l.platform] || 0) + 1;
@@ -184,7 +184,7 @@ function PlatformBreakdown({ logs }: { logs: GameLog[] }) {
       )}
     </View>
   );
-}
+});
 
 // ─── REVIEW CARD ─────────────────────────────────────────────────────────────
 
@@ -350,17 +350,23 @@ function ProfileContent() {
     }
   }, []);
 
-  useEffect(() => { load(); }, []);
-
   useFocusEffect(
     useCallback(() => {
       load();
     }, [load])
   );
 
-  const avgRating = logs.length > 0
-    ? (logs.reduce((sum, l) => sum + (l.rating || 0), 0) / logs.length).toFixed(1)
-    : "—";
+  const avgRating = useMemo(
+    () => logs.length > 0
+      ? (logs.reduce((sum, l) => sum + (l.rating || 0), 0) / logs.length).toFixed(1)
+      : "—",
+    [logs]
+  );
+
+  const completedCount = useMemo(
+    () => logs.filter((l) => l.status === "Completed").length,
+    [logs]
+  );
 
   const initials = profile
     ? `${profile.firstName[0]}${profile.lastName[0]}`.toUpperCase()
@@ -411,7 +417,7 @@ function ProfileContent() {
               {[
                 { value: logs.length, label: "Logged" },
                 { value: avgRating, label: "Avg Rating" },
-                { value: logs.filter((l) => l.status === "Completed").length, label: "Completed" },
+                { value: completedCount, label: "Completed" },
                 { value: vaultCount, label: "Vaults" },
               ].map(({ value, label }) => (
                 <View key={label} style={s.statCol}>
