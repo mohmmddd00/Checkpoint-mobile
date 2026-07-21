@@ -37,6 +37,8 @@ interface UserRef {
   profileImage: string;
 }
 
+import type { InitialEngagement } from "../utils/engagementTypes";
+
 interface CommunityReview {
   _id: string;
   user: UserRef;
@@ -49,6 +51,7 @@ interface CommunityReview {
   editedAt?: string | null;
   coverImage: string | null;
   releasedDate: string | null;
+  initialEngagement?: InitialEngagement;
 }
 
 // ─── USER AVATAR ──────────────────────────────────────────────────────────────
@@ -188,7 +191,7 @@ function CommunityReviewCard({
 
       {/* ── ENGAGEMENT ── */}
       <View style={s.engagementWrap}>
-        <ReviewEngagement gameLogId={review._id} />
+        <ReviewEngagement gameLogId={review._id} initialEngagement={review.initialEngagement} />
       </View>
     </View>
   );

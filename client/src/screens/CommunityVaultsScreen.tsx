@@ -55,6 +55,7 @@ interface CommunityVault {
   games: VaultGame[];
   createdAt: string;
   editedAt?: string | null;
+  saveCount?: number;
 }
 
 // ─── USER AVATAR ──────────────────────────────────────────────────────────────
@@ -93,22 +94,7 @@ function CommunityVaultCard({
   const [pressed, setPressed] = useState(false);
   const isOwnVault = !!currentUserId && vault.user._id === currentUserId;
   const { saved, loading: saveLoading, toggle } = useSavedVault(vault._id, isOwnVault);
-  const [saveCount, setSaveCount] = useState<number | null>(null);
-
-  useEffect(() => {
-    const fetchCount = async () => {
-      try {
-        const token = await storage.getToken();
-        const res = await fetch(`${API_URL}/saved-vaults/count/${vault._id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) return;
-        const data = await res.json();
-        setSaveCount(data.count);
-      } catch {}
-    };
-    fetchCount();
-  }, [vault._id]);
+  const [saveCount, setSaveCount] = useState<number | null>(vault.saveCount ?? null);
 
   const handleToggleSave = async () => {
     if (saveLoading) return;

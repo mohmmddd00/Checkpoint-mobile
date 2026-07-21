@@ -14,6 +14,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { cpToast } from "../utils/toast";
 import { DeleteConfirmMenu } from "./DeleteConfirmMenu";
 
+import type { InitialEngagement } from "../utils/engagementTypes";
+
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 interface CommentEntry {
@@ -355,12 +357,17 @@ function CommentNode({ comment, gameLogId, authHeaders, currentUserId, depth, on
 
 interface ReviewEngagementProps {
   gameLogId: string;
+  initialEngagement?: InitialEngagement;
 }
 
-export function ReviewEngagement({ gameLogId }: ReviewEngagementProps) {
+export function ReviewEngagement({ gameLogId, initialEngagement }: ReviewEngagementProps) {
   const [reactions, setReactions] = useState<ReactionState>({
-    likes: 0, dislikes: 0, userReaction: null, isOwnLog: false,
+    likes: initialEngagement?.likes ?? 0,
+    dislikes: initialEngagement?.dislikes ?? 0,
+    userReaction: initialEngagement?.userReaction ?? null,
+    isOwnLog: initialEngagement?.isOwnLog ?? false,
   });
+  const [commentCount, setCommentCount] = useState(initialEngagement?.commentCount ?? 0);
   const [comments, setComments] = useState<CommentEntry[]>([]);
   const [newComment, setNewComment] = useState("");
   const [posting, setPosting] = useState(false);
@@ -390,8 +397,12 @@ export function ReviewEngagement({ gameLogId }: ReviewEngagementProps) {
           fetch(`${API_URL}/gamelogs/${gameLogId}/reactions`, { headers: authHeaders }),
           fetch(`${API_URL}/gamelogs/${gameLogId}/comments`, { headers: authHeaders }),
         ]);
-        if (reactionsRes.ok) setReactions(await reactionsRes.json());
-        if (commentsRes.ok) setComments(await commentsRes.json());
+        if (reactionsRes.ok && !initialEngagement) setReactions(await reactionsRes.json());
+        if (commentsRes.ok) {
+          const fetched: CommentEntry[] = await commentsRes.json();
+          setComments(fetched);
+          setCommentCount(fetched.length);
+        }
       } catch (err) {
         console.error("Failed to load engagement data:", err);
       } finally {
@@ -446,6 +457,7 @@ export function ReviewEngagement({ gameLogId }: ReviewEngagementProps) {
     };
 
     setComments((c) => [optimisticComment, ...c]);
+    setCommentCount((n) => n + 1);
     setNewComment("");
     Keyboard.dismiss();
     setPosting(true);
@@ -461,10 +473,12 @@ export function ReviewEngagement({ gameLogId }: ReviewEngagementProps) {
         setComments((c) => c.map((cm) => (cm._id === tempId ? created : cm)));
       } else {
         setComments((c) => c.filter((cm) => cm._id !== tempId));
+        setCommentCount((n) => Math.max(0, n - 1));
         cpToast.error("Failed to post comment.");
       }
     } catch {
       setComments((c) => c.filter((cm) => cm._id !== tempId));
+      setCommentCount((n) => Math.max(0, n - 1));
       cpToast.error("Failed to post comment.");
     } finally {
       setPosting(false);
@@ -502,7 +516,7 @@ export function ReviewEngagement({ gameLogId }: ReviewEngagementProps) {
           style={[s.reactionBtn, s.reactionBtnComment, showComments && s.reactionBtnCommentActive]}
         >
           <CommentIcon color={commentColor} />
-          <Text style={[s.reactionBtnText, { color: commentColor }]}>{comments.length}</Text>
+          <Text style={[s.reactionBtnText, { color: commentColor }]}>{commentCount}</Text>
         </TouchableOpacity>
       </View>
 
