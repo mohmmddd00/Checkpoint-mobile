@@ -13,6 +13,7 @@ import {
 import Svg, { Circle, Line } from "react-native-svg";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DashboardLayout } from "../components/DashboardLayout";
+import { SearchSpinner } from "../components/SearchSpinner";
 import { LogCardMenu } from "../components/LogCardMenu";
 import { LogsScreenSkeleton } from "../LoadingScreens/LogsPageSkeleton";
 
@@ -183,7 +184,6 @@ function LogsContent() {
   const [totalLogs, setTotalLogs] = useState(0);
   const [logSearch, setLogSearch] = useState("");
   const isFetchingRef = useRef(false);
-  const spinAnim = useRef(new Animated.Value(0)).current;
   const opacity = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(12)).current;
 
@@ -291,15 +291,6 @@ function LogsContent() {
     return () => { if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current); };
   }, [logSearch]);
 
-  useEffect(() => {
-    const loop = Animated.loop(
-      Animated.timing(spinAnim, { toValue: 1, duration: 750, useNativeDriver: true })
-    );
-    if (loadingMore || isSearching) loop.start();
-    else { loop.stop(); spinAnim.setValue(0); }
-    return () => loop.stop();
-  }, [loadingMore, isSearching]);
-
   const filteredLogs = logSearch.trim() ? searchResults : logs;
   const monthGroups = buildMonthGroups(filteredLogs);
 
@@ -370,21 +361,7 @@ function LogsContent() {
         }
         ListEmptyComponent={
           isSearching || loadingMore ? (
-            <View style={s.spinnerWrap}>
-              <Animated.View
-                style={[
-                  s.spinner,
-                  {
-                    transform: [{
-                      rotate: spinAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ["0deg", "360deg"],
-                      }),
-                    }],
-                  },
-                ]}
-              />
-            </View>
+            <SearchSpinner />
           ) : (
             <View style={s.emptyWrap}>
               <Text style={s.emptyText}>
@@ -411,21 +388,7 @@ function LogsContent() {
         onEndReachedThreshold={0.3}
         ListFooterComponent={
           loadingMore ? (
-            <View style={s.spinnerWrap}>
-              <Animated.View
-                style={[
-                  s.spinner,
-                  {
-                    transform: [{
-                      rotate: spinAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ["0deg", "360deg"],
-                      }),
-                    }],
-                  },
-                ]}
-              />
-            </View>
+            <SearchSpinner />
           ) : !hasMore && logs.length > 0 && !logSearch ? (
             <Text style={s.endText}>All {totalLogs} logs loaded</Text>
           ) : null
